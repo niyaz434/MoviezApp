@@ -49,7 +49,7 @@ public class FragmentOne extends Fragment {
     // TODO - insert your themoviedb.org API KEY here
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     private String backdropPath;
-    ToggleButton toggleButton;
+
 
 
 
@@ -75,19 +75,6 @@ public class FragmentOne extends Fragment {
         View view  = inflater.inflate(R.layout.fragment_one,container,false);
 
         draweeView = (SimpleDraweeView) view.findViewById(R.id.my_image_view);
-//        toggleButton = (ToggleButton) view.findViewById(R.id.myToggleButton);
-//        toggleButton.setChecked(false);
-//        toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.color.colorPrimary));
-//        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked)
-//                    toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getContext(),R.color.colorAccent));
-//                else
-//                    toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.color.textcolor));
-//            }
-//        });
-
 
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

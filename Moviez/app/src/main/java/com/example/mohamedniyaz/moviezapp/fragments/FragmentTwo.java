@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +45,29 @@ public class FragmentTwo extends Fragment{
 
         //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         //  title = (TextView)findViewById(R.id.title_movie);
+        final FloatingActionButton fab;
+        final boolean[] flag = {true}; // true if first icon is visible, false if second one is visible.
+
+        fab = (FloatingActionButton) view.findViewById(R.id.fab);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(flag[0]){
+
+                    fab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_favourite));
+                    flag[0] = false;
+
+                }else if(!flag[0]){
+
+                    fab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_favourite_border));
+                    flag[0] = true;
+
+                }
+
+            }
+        });
         description = (TextView)view.findViewById(R.id.description_text);
         rating  = (TextView)view.findViewById(R.id.rating_text);
         rating_count = (TextView)view.findViewById(R.id.rating_count_text);

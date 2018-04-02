@@ -133,10 +133,10 @@
 
 
     <android.support.design.widget.FloatingActionButton
-
+        android:id="@+id/fab"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:src="@drawable/heart"
+        android:src="@drawable/button_favourite"
         app:layout_anchor="@id/appBar"
         app:layout_anchorGravity="bottom|end" />
 
