@@ -28,15 +28,18 @@ public class MovieId {
     @SerializedName("backdrop_path")
     private String backdropPath;
 
-    public MovieId(String original_title, String overview, float vote_average, int vote_count, List<GenereClass> genres, String backdropPath) {
+    @SerializedName("spoken_languages")
+    private List<SpokenClass> spoken_languages;
+
+    public MovieId(String original_title, String overview, float vote_average, int vote_count, List<GenereClass> genres, String backdropPath, List<SpokenClass> spoken_languages) {
         this.original_title = original_title;
         this.overview = overview;
         this.vote_average = vote_average;
         this.vote_count = vote_count;
         this.genres = genres;
         this.backdropPath = backdropPath;
+        this.spoken_languages = spoken_languages;
     }
-
 
     public String getOriginal_title() {
         return original_title;
@@ -84,5 +87,13 @@ public class MovieId {
 
     public void setBackdropPath(String backdropPath) {
         this.backdropPath = backdropPath;
+    }
+
+    public List<SpokenClass> getSpoken_languages() {
+        return spoken_languages;
+    }
+
+    public void setSpoken_languages(List<SpokenClass> spoken_languages) {
+        this.spoken_languages = spoken_languages;
     }
 }

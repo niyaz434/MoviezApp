@@ -3,6 +3,7 @@ package com.example.mohamedniyaz.moviezapp.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
 import com.example.mohamedniyaz.moviezapp.modules.MovieId;
+import com.example.mohamedniyaz.moviezapp.modules.SpokenClass;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
 import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -32,7 +34,6 @@ import static android.content.ContentValues.TAG;
 
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
-
     private List<Movie> movies;
     private Context context;
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
@@ -44,7 +45,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         TextView movie_title;
         SimpleDraweeView draweeView;
         TextView rating_textview;
-
 
 
         public MovieViewHolder(View v) {
@@ -76,10 +76,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         holder.movie_title.setText(movies.get(position).getTitle());
         holder.draweeView.setImageURI(uri + movies.get(position).getBackdropPath());
         holder.rating_textview.setText(movies.get(position).getVoteAverage().toString());
-        holder.draweeView.setOnClickListener(new View.OnClickListener() {
+        holder.movieslayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
                 ApiInterface apiService =
                         ApiClient.getClient().create(ApiInterface.class);
 
@@ -98,10 +97,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                         String overview = response.body().getOverview();
                         float vote_average = response.body().getVote_average();
                         ArrayList<GenereClass> genereClasses = (ArrayList<GenereClass>) response.body().getGenres();
+                        ArrayList<SpokenClass> spokenClasses = (ArrayList<SpokenClass>) response.body().getSpoken_languages();
                         int vote_count  = response.body().getVote_count();
                         String backdrop_path = response.body().getBackdropPath();
 
-                        arrayList.add(new AdapterModel(title_name,overview,vote_average,vote_count,genereClasses,backdrop_path));
+                        arrayList.add(new AdapterModel(title_name,overview,vote_average,vote_count,genereClasses,backdrop_path,spokenClasses));
 
                         for(int i =0; i<arrayList.size();i++){
                             System.out.println("value: " + arrayList.get(i).getOverview().toString());

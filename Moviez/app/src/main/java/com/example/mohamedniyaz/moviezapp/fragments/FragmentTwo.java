@@ -19,7 +19,7 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import java.util.ArrayList;
 
 public class FragmentTwo extends Fragment{
-    TextView title,description,rating,rating_count,genre;
+    TextView title,description,rating,rating_count,genre,language;
     SimpleDraweeView fresco_image;
 
 
@@ -73,6 +73,7 @@ public class FragmentTwo extends Fragment{
         rating_count = (TextView)view.findViewById(R.id.rating_count_text);
         genre = (TextView)view.findViewById(R.id.genre_text);
         fresco_image = (SimpleDraweeView)view.findViewById(R.id.toolbarImage) ;
+        language = (TextView)view.findViewById(R.id.language_text);
 
 
         Intent intent = getActivity().getIntent();
@@ -80,6 +81,7 @@ public class FragmentTwo extends Fragment{
         value = intent.getParcelableArrayListExtra("Array");
 
         StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder1 = new StringBuilder();
 
         for(int i = 0; i<value.size();i++){
 
@@ -93,15 +95,27 @@ public class FragmentTwo extends Fragment{
             System.out.println("Nope: "+value.get(i).getOverview().toString());
             System.out.println("Array"+value.get(i).getGenereClasses().toString());
             for(int j = 0;j<value.get(i).getGenereClasses().size();j++){
-                if (stringBuilder.length() > 0) {
+                if (stringBuilder.length() > 0 ) {
                     stringBuilder.append(", ");
                 }
+
                 stringBuilder.append(value.get(i).getGenereClasses().get(j).getName().toString());
                 System.out.println("String Builder"+stringBuilder.toString());
                 System.out.println("ArrayIn "+value.get(i).getGenereClasses().get(j).getName().toString());
             }
+
+            for(int k =0; k < value.get(i).getSpokenClasses().size();k++){
+                if(stringBuilder1.length() >0){
+                    stringBuilder1.append(", ");
+                }
+                stringBuilder1.append(value.get(i).getSpokenClasses().get(k).getName().toString());
+
+            }
+
             stringBuilder.append('.');
+            stringBuilder1.append('.');
             genre.setText(stringBuilder.toString());
+            language.setText(stringBuilder1.toString());
 
         }
 

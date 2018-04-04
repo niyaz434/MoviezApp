@@ -41,11 +41,18 @@
                 app:layout_collapseMode="pin" />
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        >
+
     <RelativeLayout
         android:id="@+id/relative_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+
         >
 
         <TextView
@@ -128,8 +135,30 @@
             android:layout_below="@+id/genre"
             />
 
+        <TextView
+            android:id="@+id/language"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/genre_text"
+            android:textSize="20sp"
+            android:textColor="#1e26b6"
+            android:text="Languages"
+            android:layout_marginLeft="22dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <TextView
+            android:id="@+id/language_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/language"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="22dp"
+            />
+
 
     </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
 
 
     <android.support.design.widget.FloatingActionButton

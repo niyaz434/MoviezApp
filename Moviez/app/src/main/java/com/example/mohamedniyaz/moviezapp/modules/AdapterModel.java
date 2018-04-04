@@ -14,15 +14,16 @@ public class AdapterModel implements Parcelable {
     int vote_count;
     List <GenereClass> genereClasses;
     String backdroppath;
+    List<SpokenClass>spokenClasses;
 
-
-    public AdapterModel(String title_name, String overview, float vote_average, int vote_count, List<GenereClass> genereClasses, String backdroppath) {
+    public AdapterModel(String title_name, String overview, float vote_average, int vote_count, List<GenereClass> genereClasses, String backdroppath,List<SpokenClass>spokenClasses) {
         this.title_name = title_name;
         this.overview = overview;
         this.vote_average = vote_average;
         this.vote_count = vote_count;
         this.genereClasses = genereClasses;
         this.backdroppath = backdroppath;
+        this.spokenClasses = spokenClasses;
     }
 
     private AdapterModel(Parcel in) {
@@ -32,8 +33,11 @@ public class AdapterModel implements Parcelable {
         this.vote_count = in.readInt();
        this.genereClasses = in.readArrayList(null);
         this.backdroppath = in.readString();
+        this.spokenClasses = in.readArrayList(null );
 
     }
+
+
 
     public String getTitle_name() {
         return title_name;
@@ -82,6 +86,13 @@ public class AdapterModel implements Parcelable {
     public void setBackdroppath(String backdroppath) {
         this.backdroppath = backdroppath;
     }
+    public List<SpokenClass> getSpokenClasses() {
+        return spokenClasses;
+    }
+
+    public void setSpokenClasses(List<SpokenClass> spokenClasses) {
+        this.spokenClasses = spokenClasses;
+    }
 
     @Override
     public int describeContents() {
@@ -97,6 +108,7 @@ public class AdapterModel implements Parcelable {
         dest.writeInt(vote_count);
         dest.writeList(genereClasses);
         dest.writeString(backdroppath);
+        dest.writeList(spokenClasses);
 
     }
 
