@@ -2,15 +2,19 @@ package com.example.mohamedniyaz.moviezapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.SystemClock;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
@@ -45,6 +49,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         TextView movie_title;
         SimpleDraweeView draweeView;
         TextView rating_textview;
+        ToggleButton toggleButton;
 
 
         public MovieViewHolder(View v) {
@@ -53,6 +58,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             movie_title = (TextView) v.findViewById(R.id.movie_title);
             draweeView= (SimpleDraweeView) v.findViewById(R.id.my_image_view);
             rating_textview = (TextView)v.findViewById(R.id.rating_bar);
+            toggleButton = (ToggleButton)v.findViewById(R.id.myToggleButton);
         }
     }
 
@@ -62,8 +68,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     @Override
-    public MoviesAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent,
-                                                            int viewType) {
+    public MoviesAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Log.d(TAG, "onCreateViewHolder: ");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_list, parent, false);
         return new MovieViewHolder(view);
@@ -71,8 +76,45 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
 
     @Override
-    public void onBindViewHolder(MovieViewHolder holder, final int position) {
-        Log.d(TAG, "onBindViewHolder: ");
+    public void onBindViewHolder(final MovieViewHolder holder, final int position) {
+        Log.d(TAG, "onBindViewHolder: "+position);
+
+
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences("boolean",Context.MODE_PRIVATE);
+        Boolean a = sharedPreferences.getBoolean("check"+position,false);
+        if(a){
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+            holder.toggleButton.setChecked(true);
+        }else {
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+            holder.toggleButton.setChecked(false);
+        }
+
+
+                holder.toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+
+
+                if(isChecked){
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+                    SharedPreferences.Editor editor = context.getSharedPreferences("boolean",Context.MODE_PRIVATE).edit();
+                    editor.putBoolean("check"+position,true);
+                    editor.apply();
+                }
+                else{
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+                    SharedPreferences.Editor editor = context.getSharedPreferences("boolean",Context.MODE_PRIVATE).edit();
+                    editor.putBoolean("check"+position,false);
+                    editor.apply();
+                }
+            }
+        });
+
+
+
         holder.movie_title.setText(movies.get(position).getTitle());
         holder.draweeView.setImageURI(uri + movies.get(position).getBackdropPath());
         holder.rating_textview.setText(movies.get(position).getVoteAverage().toString());
