@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -84,6 +85,7 @@ public class FragmentOne extends Fragment {
        final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
        recyclerView.setLayoutManager(layoutManager);
         loadData();
+        recyclerView.setMotionEventSplittingEnabled(false);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -116,7 +118,6 @@ public class FragmentOne extends Fragment {
             }
         });
 
-
         return view;
 
     }
@@ -140,10 +141,11 @@ public class FragmentOne extends Fragment {
                     Log.d(TAG, "MoviesList: "+ moviesList.get(i));
 
                 }
-                MoviesAdapter moviesAdapter = new MoviesAdapter(moviesList, R.layout.recycler_view_list, getContext());
+                MoviesAdapter moviesAdapter = new MoviesAdapter(moviesList, R.layout.recycler_view_list, getActivity());
                 recyclerView.setAdapter(moviesAdapter);
                 recieved = true;
                 moviesAdapter.notifyDataSetChanged();
+                recyclerView.setMotionEventSplittingEnabled(false);
                 recyclerView.scrollToPosition(scrollPosition);
 
             }
@@ -158,6 +160,7 @@ public class FragmentOne extends Fragment {
 
 
     }
+
 
 
 }

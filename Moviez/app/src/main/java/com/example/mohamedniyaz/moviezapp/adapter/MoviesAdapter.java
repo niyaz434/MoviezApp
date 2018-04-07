@@ -41,6 +41,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private List<Movie> movies;
     private Context context;
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
+    private long mLastClickTime = 0;
     Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
 
 
@@ -121,6 +122,14 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         holder.movieslayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+
+
+                if(SystemClock.elapsedRealtime() - mLastClickTime<1000){
+                    return;
+                }
+
+                mLastClickTime = SystemClock.elapsedRealtime();
+
                 ApiInterface apiService =
                         ApiClient.getClient().create(ApiInterface.class);
 
