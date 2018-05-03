@@ -99,7 +99,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                 if(movies.get(position).getFavourite()){
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
                     sqliteHelper = new SqliteHelper(context);
-                    sqliteHelper.insert(movies.get(position).getId(),movies.get(position).getTitle(),movies.get(position).getFavourite());
+                  if (sqliteHelper.data(movies.get(position).getId())) {
+                      sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
+                  }else {
+                      sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
+
+                  }
                 }
                 else{
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
