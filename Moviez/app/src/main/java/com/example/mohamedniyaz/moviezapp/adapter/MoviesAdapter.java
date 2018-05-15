@@ -82,12 +82,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     @Override
     public void onBindViewHolder(final MovieViewHolder holder, final int position) {
         Log.d(TAG, "onBindViewHolder: "+position);
-
-
+        sqliteHelper = new SqliteHelper(context);
         if(movies.get(position).getFavourite()){
             holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
         }
         else{
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+        }
+        if(sqliteHelper.itsFavourite(movies.get(position).getId())){
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+        }else {
             holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
         }
 
@@ -98,12 +102,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                 movies.get(position).setFavourite(isChecked);
                 if(movies.get(position).getFavourite()){
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-                    sqliteHelper = new SqliteHelper(context);
                   if (sqliteHelper.data(movies.get(position).getId())) {
                       sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
                   }else {
                       sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
-
                   }
                 }
                 else{
@@ -117,20 +119,17 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
 
 
+
         holder.movie_title.setText(movies.get(position).getTitle());
         holder.draweeView.setImageURI(uri + movies.get(position).getBackdropPath());
         holder.rating_textview.setText(movies.get(position).getVoteAverage().toString());
         holder.movieslayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
-
                 if(SystemClock.elapsedRealtime() - mLastClickTime<1000){
                     return;
                 }
-
                 mLastClickTime = SystemClock.elapsedRealtime();
-
                 int id = movies.get(position).getId();
                 Intent intent = new Intent(context,MovieIdActivity.class);
                 intent.putExtra("Int",id);
@@ -142,7 +141,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public int getItemCount() {
         return movies.size();
     }
-
 
 
 }

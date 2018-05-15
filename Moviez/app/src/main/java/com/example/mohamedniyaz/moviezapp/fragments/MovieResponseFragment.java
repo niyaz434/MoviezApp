@@ -1,5 +1,6 @@
 package com.example.mohamedniyaz.moviezapp.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mohamedniyaz.moviezapp.R;
-import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
+import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
 import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.MovieId;
@@ -24,6 +25,7 @@ import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,14 +33,17 @@ import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
 
-public class MovieResponseFragment extends Fragment{
+public class MovieResponseFragment extends Fragment {
     TextView title,description,rating,rating_count,genre,language;
     SimpleDraweeView fresco_image;
     ArrayList<AdapterModel> arrayList = new ArrayList<>();
-
-    Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
+    List<MovieId> movieIdList = new ArrayList<>();
+    Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/");
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     public int movieId;
+    boolean isFavourite = true;
+    private SqliteHelper sqliteHelper;
+    public String title_name;
 
 
     @Override
@@ -49,41 +54,18 @@ public class MovieResponseFragment extends Fragment{
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater,  ViewGroup container,  Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_two,container,false);
+        final View view = inflater.inflate(R.layout.fragment_two,container,false);
 
         final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsingToolbar);
 
         final FloatingActionButton fab;
-        final boolean[] flag = {true}; // true if first icon is visible, false if second one is visible.
 
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        sqliteHelper = new SqliteHelper(getActivity());
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(flag[0]){
-
-                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
-                    flag[0] = false;
-
-                }else {
-
-                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
-                    flag[0] = true;
-
-                }
-
-            }
-        });
-
-
-
-
-
-
+        final boolean[] flag = {false}; // true if first icon is visible, false if second one is visible.
         description = (TextView)view.findViewById(R.id.description_text);
         rating  = (TextView)view.findViewById(R.id.rating_text);
         rating_count = (TextView)view.findViewById(R.id.rating_count_text);
@@ -93,17 +75,16 @@ public class MovieResponseFragment extends Fragment{
 
 
         Intent intent = getActivity().getIntent();
-        int idNo = intent.getIntExtra("Int",0);
+        movieId = intent.getIntExtra("Int",0);
 
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        Call<MovieId> call = apiService.getMovieDetails(idNo,API_KEY);
+        Call<MovieId> call = apiService.getMovieDetails(movieId,API_KEY);
         call.enqueue(new Callback<MovieId>() {
             @Override
             public void onResponse(Call<MovieId> call, Response<MovieId> response) {
-
-                String title_name = response.body().getOriginal_title();
+                title_name = response.body().getOriginal_title();
                 Log.d(TAG, "Title name: "+title_name);
                 String overview = response.body().getOverview();
                 float vote_average = response.body().getVote_average();
@@ -111,7 +92,6 @@ public class MovieResponseFragment extends Fragment{
                 ArrayList<SpokenClass> spokenClasses = (ArrayList<SpokenClass>) response.body().getSpoken_languages();
                 int vote_count  = response.body().getVote_count();
                 String backdrop_path = response.body().getBackdropPath();
-
                 StringBuilder stringBuilder = new StringBuilder();
                 StringBuilder stringBuilder1 = new StringBuilder();
 
@@ -149,9 +129,34 @@ public class MovieResponseFragment extends Fragment{
                     language.setText(stringBuilder1.toString());
 
                 Log.d(TAG, "onResponse: ");
+                    if (isFavourite){
+                        isFavourite = false;
+                    }
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(!isFavourite){
+                                fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
+                                isFavourite = true;
+                                if (sqliteHelper.data(movieId)){
+                                    sqliteHelper.update(movieId, isFavourite);
+                                }else {
+                                    sqliteHelper.insert(movieId, title_name, isFavourite);
+                                }
+                            }else {
+                                isFavourite = false;
+                                fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
+                                sqliteHelper.update(movieId,isFavourite);
+                            }
 
+                        }
+                    });
+                    if(sqliteHelper.itsFavourite(movieId)){
+                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
+                    }else {
+                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+                    }
             }
-
             @Override
             public void onFailure(Call<MovieId> call, Throwable t) {
                 Log.d(TAG, "onFailure: ");
@@ -159,9 +164,12 @@ public class MovieResponseFragment extends Fragment{
                 Log.e(TAG, t.toString());
             }
         });
-
-
-
         return view;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "onAttach: ++ ");
     }
 }

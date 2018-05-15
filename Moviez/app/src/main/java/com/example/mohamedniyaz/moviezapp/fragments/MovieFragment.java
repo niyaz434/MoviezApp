@@ -96,23 +96,14 @@ public class MovieFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
                  total = layoutManager.getItemCount();
                 int firstVisibleItemCount = layoutManager.findFirstVisibleItemPosition();
                 lastVisibleItemCount = layoutManager.findLastVisibleItemPosition();
-
-
-
                 if((recieved) && (total > 0) && ((total - 1) == lastVisibleItemCount)){
-
                     page++;
                     loadData();
                     recieved = false;
-
-
                 }
-
-
             }
         });
 

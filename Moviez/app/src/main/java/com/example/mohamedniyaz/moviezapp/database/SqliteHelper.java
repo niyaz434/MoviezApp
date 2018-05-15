@@ -95,4 +95,23 @@ public class SqliteHelper extends SQLiteOpenHelper {
         return yesItis;
     }
 
+
+    public boolean itsFavourite(int movie_id){
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        int isTrue = 0;
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+ " WHERE " + COLUMN_MOVIE_ID + "=" + movie_id,null);
+        if (cursor != null){
+            if (cursor.moveToFirst()){
+                do{
+                    isTrue =  cursor.getInt(2);
+                }while (cursor.moveToNext());
+            }
+        }
+        if (isTrue == 1){
+            return true;
+        }else {
+            return false;
+        }
+
+    }
 }
