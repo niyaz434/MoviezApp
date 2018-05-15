@@ -5,23 +5,36 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mohamedniyaz.moviezapp.R;
+import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
 import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
+import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
+import com.example.mohamedniyaz.moviezapp.modules.MovieId;
+import com.example.mohamedniyaz.moviezapp.modules.SpokenClass;
+import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
+import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.ArrayList;
 
-public class FragmentTwo extends Fragment{
-    TextView title,description,rating,rating_count,genre;
-    SimpleDraweeView fresco_image;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import static android.content.ContentValues.TAG;
+
+public class FragmentTwo extends Fragment{
+    TextView title,description,rating,rating_count,genre,language;
+    SimpleDraweeView fresco_image;
+    ArrayList<AdapterModel> arrayList = new ArrayList<>();
 
     Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
@@ -40,11 +53,8 @@ public class FragmentTwo extends Fragment{
 
         View view = inflater.inflate(R.layout.fragment_two,container,false);
 
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsingToolbar);
+        final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsingToolbar);
 
-
-        //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        //  title = (TextView)findViewById(R.id.title_movie);
         final FloatingActionButton fab;
         final boolean[] flag = {true}; // true if first icon is visible, false if second one is visible.
 
@@ -56,54 +66,100 @@ public class FragmentTwo extends Fragment{
 
                 if(flag[0]){
 
-                    fab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_favourite));
+                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
                     flag[0] = false;
 
                 }else if(!flag[0]){
 
-                    fab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_favourite_border));
+                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
                     flag[0] = true;
 
                 }
 
             }
         });
+
+
+
+
+
+
         description = (TextView)view.findViewById(R.id.description_text);
         rating  = (TextView)view.findViewById(R.id.rating_text);
         rating_count = (TextView)view.findViewById(R.id.rating_count_text);
         genre = (TextView)view.findViewById(R.id.genre_text);
         fresco_image = (SimpleDraweeView)view.findViewById(R.id.toolbarImage) ;
+        language = (TextView)view.findViewById(R.id.language_text);
 
 
         Intent intent = getActivity().getIntent();
-        ArrayList<AdapterModel> value = new ArrayList<AdapterModel>();
-        value = intent.getParcelableArrayListExtra("Array");
+        int idNo = intent.getIntExtra("Int",0);
 
-        StringBuilder stringBuilder = new StringBuilder();
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
 
-        for(int i = 0; i<value.size();i++){
+        Call<MovieId> call = apiService.getMovieDetails(idNo,API_KEY);
+        call.enqueue(new Callback<MovieId>() {
+            @Override
+            public void onResponse(Call<MovieId> call, Response<MovieId> response) {
 
-            collapsingToolbarLayout.setTitle(value.get(i).getTitle_name());
-            description.setText(value.get(i).getOverview());
-            rating.setText(" "+value.get(i).getVote_average());
-            rating_count.setText(" "+value.get(i).getVote_count());
-            fresco_image.setImageURI(uri + value.get(i).getBackdroppath());
+                String title_name = response.body().getOriginal_title();
+                Log.d(TAG, "Title name: "+title_name);
+                String overview = response.body().getOverview();
+                float vote_average = response.body().getVote_average();
+                ArrayList<GenereClass> genereClasses = (ArrayList<GenereClass>) response.body().getGenres();
+                ArrayList<SpokenClass> spokenClasses = (ArrayList<SpokenClass>) response.body().getSpoken_languages();
+                int vote_count  = response.body().getVote_count();
+                String backdrop_path = response.body().getBackdropPath();
+
+                StringBuilder stringBuilder = new StringBuilder();
+                StringBuilder stringBuilder1 = new StringBuilder();
 
 
-            System.out.println("Nope: "+value.get(i).getOverview().toString());
-            System.out.println("Array"+value.get(i).getGenereClasses().toString());
-            for(int j = 0;j<value.get(i).getGenereClasses().size();j++){
-                if (stringBuilder.length() > 0) {
-                    stringBuilder.append(", ");
-                }
-                stringBuilder.append(value.get(i).getGenereClasses().get(j).getName().toString());
-                System.out.println("String Builder"+stringBuilder.toString());
-                System.out.println("ArrayIn "+value.get(i).getGenereClasses().get(j).getName().toString());
+                    collapsingToolbarLayout.setTitle(title_name);
+                    description.setText(overview);
+                    rating.setText(" "+vote_average);
+                    rating_count.setText(" "+vote_count);
+                    fresco_image.setImageURI(uri + backdrop_path);
+
+
+                    System.out.println("Nope: "+overview);
+                    System.out.println("Array"+genereClasses);
+                    for(int j = 0;j<genereClasses.size();j++){
+                        if (stringBuilder.length() > 0 ) {
+                            stringBuilder.append(", ");
+                        }
+
+                        stringBuilder.append(genereClasses.get(j).getName().toString());
+                        System.out.println("String Builder"+stringBuilder.toString());
+                        System.out.println("ArrayIn "+genereClasses.get(j).getName().toString());
+                    }
+
+                    for(int k =0; k < spokenClasses.size();k++){
+                        if(stringBuilder1.length() >0){
+                            stringBuilder1.append(", ");
+                        }
+                        stringBuilder1.append(spokenClasses.get(k).getName().toString());
+
+                    }
+
+                    stringBuilder.append('.');
+                    stringBuilder1.append('.');
+                    genre.setText(stringBuilder.toString());
+                    language.setText(stringBuilder1.toString());
+
+                Log.d(TAG, "onResponse: ");
+
             }
-            stringBuilder.append('.');
-            genre.setText(stringBuilder.toString());
 
-        }
+            @Override
+            public void onFailure(Call<MovieId> call, Throwable t) {
+                Log.d(TAG, "onFailure: ");
+                // Log error here since request failed
+                Log.e(TAG, t.toString());
+            }
+        });
+
 
 
         return view;

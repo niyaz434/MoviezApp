@@ -2,14 +2,19 @@ package com.example.mohamedniyaz.moviezapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.SystemClock;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
@@ -17,6 +22,7 @@ import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
 import com.example.mohamedniyaz.moviezapp.modules.MovieId;
+import com.example.mohamedniyaz.moviezapp.modules.SpokenClass;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
 import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -32,10 +38,10 @@ import static android.content.ContentValues.TAG;
 
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
-
     private List<Movie> movies;
     private Context context;
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
+    private long mLastClickTime = 0;
     Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
 
 
@@ -44,7 +50,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         TextView movie_title;
         SimpleDraweeView draweeView;
         TextView rating_textview;
-
+        ToggleButton toggleButton;
 
 
         public MovieViewHolder(View v) {
@@ -53,6 +59,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             movie_title = (TextView) v.findViewById(R.id.movie_title);
             draweeView= (SimpleDraweeView) v.findViewById(R.id.my_image_view);
             rating_textview = (TextView)v.findViewById(R.id.rating_bar);
+            toggleButton = (ToggleButton)v.findViewById(R.id.myToggleButton);
+
         }
     }
 
@@ -62,8 +70,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     @Override
-    public MoviesAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent,
-                                                            int viewType) {
+    public MoviesAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Log.d(TAG, "onCreateViewHolder: ");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_list, parent, false);
         return new MovieViewHolder(view);
@@ -71,58 +78,52 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
 
     @Override
-    public void onBindViewHolder(MovieViewHolder holder, final int position) {
-        Log.d(TAG, "onBindViewHolder: ");
+    public void onBindViewHolder(final MovieViewHolder holder, final int position) {
+        Log.d(TAG, "onBindViewHolder: "+position);
+
+
+        if(movies.get(position).getFavourite()){
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+        }
+        else{
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+        }
+
+        holder.toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                movies.get(position).setFavourite(isChecked);
+                if(movies.get(position).getFavourite()){
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+                }
+                else{
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+                }
+
+            }
+        });
+
+
+
         holder.movie_title.setText(movies.get(position).getTitle());
         holder.draweeView.setImageURI(uri + movies.get(position).getBackdropPath());
         holder.rating_textview.setText(movies.get(position).getVoteAverage().toString());
-        holder.draweeView.setOnClickListener(new View.OnClickListener() {
+        holder.movieslayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
 
-                ApiInterface apiService =
-                        ApiClient.getClient().create(ApiInterface.class);
 
-                Call<MovieId> call = apiService.getMovieDetails(movies.get(position).getId(),API_KEY);
-                call.enqueue(new Callback<MovieId>() {
-                    @Override
-                    public void onResponse(Call<MovieId> call, Response<MovieId> response) {
-                        System.out.println(movies.get(position).getId());
-                        //int statusCode = response.code();
-                       // List<Movie> movies = response.body().getResults();
+                if(SystemClock.elapsedRealtime() - mLastClickTime<1000){
+                    return;
+                }
 
-                       ArrayList<AdapterModel> arrayList = new ArrayList<>();
+                mLastClickTime = SystemClock.elapsedRealtime();
 
-                        String title_name = response.body().getOriginal_title();
-                        Log.d(TAG, "Title name: "+title_name);
-                        String overview = response.body().getOverview();
-                        float vote_average = response.body().getVote_average();
-                        ArrayList<GenereClass> genereClasses = (ArrayList<GenereClass>) response.body().getGenres();
-                        int vote_count  = response.body().getVote_count();
-                        String backdrop_path = response.body().getBackdropPath();
-
-                        arrayList.add(new AdapterModel(title_name,overview,vote_average,vote_count,genereClasses,backdrop_path));
-
-                        for(int i =0; i<arrayList.size();i++){
-                            System.out.println("value: " + arrayList.get(i).getOverview().toString());
-
-                        }
-
-
-                        Log.d(TAG, "onResponse: ");
-                        Intent intent = new Intent(context,MovieIdActivity.class);
-                        intent.putParcelableArrayListExtra("Array",arrayList);
-                        context.startActivity(intent);
-                    }
-
-                    @Override
-                    public void onFailure(Call<MovieId> call, Throwable t) {
-                        Log.d(TAG, "onFailure: ");
-                        // Log error here since request failed
-                        Log.e(TAG, t.toString());
-                    }
-                });
-
+                int id = movies.get(position).getId();
+                Intent intent = new Intent(context,MovieIdActivity.class);
+                intent.putExtra("Int",id);
+                context.startActivity(intent);
             }
         });
     }

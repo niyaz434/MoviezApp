@@ -5,11 +5,12 @@
     android:layout_height="wrap_content"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:id="@+id/movies_layout"
+    android:padding="5dp"
     android:orientation="vertical"
+    android:splitMotionEvents="false"
     >
 
     <com.facebook.drawee.view.SimpleDraweeView
-        android:onClick="imageView"
         android:id="@+id/my_image_view"
         android:layout_width="match_parent"
         android:layout_height="200dp"
@@ -22,7 +23,8 @@
         android:layout_below="@+id/my_image_view"
         android:layout_marginBottom="10dp"
         android:background="#33b7aeae"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:splitMotionEvents="false">
 
         <TextView
             android:textSize="20sp"
@@ -31,6 +33,7 @@
             android:id="@+id/movie_title"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
+            android:textColor="@color/colorPrimary"
             />
 
         <ToggleButton
