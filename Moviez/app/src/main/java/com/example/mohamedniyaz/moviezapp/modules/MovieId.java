@@ -31,6 +31,7 @@ public class MovieId {
     @SerializedName("spoken_languages")
     private List<SpokenClass> spoken_languages;
 
+
     public MovieId(String original_title, String overview, float vote_average, int vote_count, List<GenereClass> genres, String backdropPath, List<SpokenClass> spoken_languages) {
         this.original_title = original_title;
         this.overview = overview;

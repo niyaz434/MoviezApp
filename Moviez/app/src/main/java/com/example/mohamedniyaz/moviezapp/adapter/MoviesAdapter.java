@@ -60,6 +60,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             draweeView= (SimpleDraweeView) v.findViewById(R.id.my_image_view);
             rating_textview = (TextView)v.findViewById(R.id.rating_bar);
             toggleButton = (ToggleButton)v.findViewById(R.id.myToggleButton);
+
         }
     }
 
@@ -81,36 +82,25 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         Log.d(TAG, "onBindViewHolder: "+position);
 
 
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences("boolean",Context.MODE_PRIVATE);
-        Boolean a = sharedPreferences.getBoolean("check"+position,false);
-        if(a){
+        if(movies.get(position).getFavourite()){
             holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-            holder.toggleButton.setChecked(true);
-        }else {
+        }
+        else{
             holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
-            holder.toggleButton.setChecked(false);
         }
 
-
-                holder.toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-
-
-                if(isChecked){
+                movies.get(position).setFavourite(isChecked);
+                if(movies.get(position).getFavourite()){
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-                    SharedPreferences.Editor editor = context.getSharedPreferences("boolean",Context.MODE_PRIVATE).edit();
-                    editor.putBoolean("check"+position,true);
-                    editor.apply();
                 }
                 else{
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
-                    SharedPreferences.Editor editor = context.getSharedPreferences("boolean",Context.MODE_PRIVATE).edit();
-                    editor.putBoolean("check"+position,false);
-                    editor.apply();
                 }
+
             }
         });
 
@@ -130,50 +120,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
                 mLastClickTime = SystemClock.elapsedRealtime();
 
-                ApiInterface apiService =
-                        ApiClient.getClient().create(ApiInterface.class);
-
-                Call<MovieId> call = apiService.getMovieDetails(movies.get(position).getId(),API_KEY);
-                call.enqueue(new Callback<MovieId>() {
-                    @Override
-                    public void onResponse(Call<MovieId> call, Response<MovieId> response) {
-                        System.out.println(movies.get(position).getId());
-                        //int statusCode = response.code();
-                       // List<Movie> movies = response.body().getResults();
-
-                       ArrayList<AdapterModel> arrayList = new ArrayList<>();
-
-                        String title_name = response.body().getOriginal_title();
-                        Log.d(TAG, "Title name: "+title_name);
-                        String overview = response.body().getOverview();
-                        float vote_average = response.body().getVote_average();
-                        ArrayList<GenereClass> genereClasses = (ArrayList<GenereClass>) response.body().getGenres();
-                        ArrayList<SpokenClass> spokenClasses = (ArrayList<SpokenClass>) response.body().getSpoken_languages();
-                        int vote_count  = response.body().getVote_count();
-                        String backdrop_path = response.body().getBackdropPath();
-
-                        arrayList.add(new AdapterModel(title_name,overview,vote_average,vote_count,genereClasses,backdrop_path,spokenClasses));
-
-                        for(int i =0; i<arrayList.size();i++){
-                            System.out.println("value: " + arrayList.get(i).getOverview().toString());
-
-                        }
-
-
-                        Log.d(TAG, "onResponse: ");
-                        Intent intent = new Intent(context,MovieIdActivity.class);
-                        intent.putParcelableArrayListExtra("Array",arrayList);
-                        context.startActivity(intent);
-                    }
-
-                    @Override
-                    public void onFailure(Call<MovieId> call, Throwable t) {
-                        Log.d(TAG, "onFailure: ");
-                        // Log error here since request failed
-                        Log.e(TAG, t.toString());
-                    }
-                });
-
+                int id = movies.get(position).getId();
+                Intent intent = new Intent(context,MovieIdActivity.class);
+                intent.putExtra("Int",id);
+                context.startActivity(intent);
             }
         });
     }

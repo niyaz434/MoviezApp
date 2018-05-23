@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -64,10 +64,10 @@ public class FragmentOne extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fresco.initialize(getContext());
+        Fresco.initialize(getActivity());
 
         if (API_KEY.isEmpty()) {
-            Toast.makeText(getContext(), "Please obtain your API KEY first from themoviedb.org", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "Please obtain your API KEY first from themoviedb.org", Toast.LENGTH_LONG).show();
         }
 
 
@@ -80,7 +80,6 @@ public class FragmentOne extends Fragment {
         final View view  = inflater.inflate(R.layout.fragment_one,container,false);
 
         draweeView = (SimpleDraweeView) view.findViewById(R.id.my_image_view);
-
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
        final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
        recyclerView.setLayoutManager(layoutManager);
@@ -114,7 +113,6 @@ public class FragmentOne extends Fragment {
                 }
 
 
-
             }
         });
 
@@ -135,11 +133,14 @@ public class FragmentOne extends Fragment {
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                 //int statusCode = response.code();
                 movies = response.body().getResults();
+
                 Log.d(TAG, "onResponse: "+page);
                 moviesList.addAll(movies);
                 for(int  i =0; i<moviesList.size();i++){
+                    if(moviesList.get(i).getFavourite() == null) {
+                        moviesList.get(i).setFavourite(false);
+                    }
                     Log.d(TAG, "MoviesList: "+ moviesList.get(i));
-
                 }
                 MoviesAdapter moviesAdapter = new MoviesAdapter(moviesList, R.layout.recycler_view_list, getActivity());
                 recyclerView.setAdapter(moviesAdapter);
