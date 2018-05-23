@@ -18,6 +18,7 @@ import android.widget.ToggleButton;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
+import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
 import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
@@ -38,6 +39,7 @@ import static android.content.ContentValues.TAG;
 
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
+    private SqliteHelper sqliteHelper;
     private List<Movie> movies;
     private Context context;
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
@@ -96,9 +98,18 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                 movies.get(position).setFavourite(isChecked);
                 if(movies.get(position).getFavourite()){
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+                    sqliteHelper = new SqliteHelper(context);
+                  if (sqliteHelper.data(movies.get(position).getId())) {
+                      sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
+                  }else {
+                      sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
+
+                  }
                 }
                 else{
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+                    sqliteHelper.update(movies.get(position).getId(),movies.get(position).getFavourite());
+                    System.out.println(isChecked);
                 }
 
             }

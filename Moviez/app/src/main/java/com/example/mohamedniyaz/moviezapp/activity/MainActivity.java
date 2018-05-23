@@ -1,14 +1,12 @@
 package com.example.mohamedniyaz.moviezapp.activity;
 
-import android.annotation.SuppressLint;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.mohamedniyaz.moviezapp.R;
-import com.example.mohamedniyaz.moviezapp.fragments.FragmentOne;
+import com.example.mohamedniyaz.moviezapp.fragments.MovieFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        Fragment fragment = new FragmentOne();
+        Fragment fragment = new MovieFragment();
         if(fragment!=null){
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
