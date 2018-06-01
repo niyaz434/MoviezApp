@@ -1,5 +1,6 @@
 package com.example.mohamedniyaz.moviezapp.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,13 +47,17 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private long mLastClickTime = 0;
     Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
 
+    public MoviesAdapter(Context context) {
+        this.context = context;
+    }
+
 
     public static class MovieViewHolder extends RecyclerView.ViewHolder {
+        ToggleButton toggleButton;
         RelativeLayout movieslayout;
         TextView movie_title;
         SimpleDraweeView draweeView;
         TextView rating_textview;
-        ToggleButton toggleButton;
 
 
         public MovieViewHolder(View v) {
@@ -69,6 +74,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public MoviesAdapter(List<Movie> movies, int list_item, Context context) {
         this.movies = movies;
         this.context = context;
+        sqliteHelper = new SqliteHelper(context);
     }
 
     @Override
@@ -79,16 +85,21 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
 
+    public void update(List<Movie> moviesList){
+        this.movies = moviesList;
+        notifyDataSetChanged();
+        Log.d(TAG, "update: ++ ");
+    }
+
     @Override
     public void onBindViewHolder(final MovieViewHolder holder, final int position) {
         Log.d(TAG, "onBindViewHolder: "+position);
-        sqliteHelper = new SqliteHelper(context);
-        if(movies.get(position).getFavourite()){
-            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-        }
-        else{
-            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
-        }
+//        if(movies.get(position).getFavourite()){
+//            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+//        }
+//        else{
+//            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+//        }
         if(sqliteHelper.itsFavourite(movies.get(position).getId())){
             holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
         }else {

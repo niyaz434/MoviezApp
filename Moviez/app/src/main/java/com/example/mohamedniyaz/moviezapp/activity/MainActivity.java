@@ -11,6 +11,7 @@ import com.example.mohamedniyaz.moviezapp.fragments.MovieFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String TAG = "MainAvtivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,4 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ++");
+
+    }
 }

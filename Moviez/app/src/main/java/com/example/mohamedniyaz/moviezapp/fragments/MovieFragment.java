@@ -22,6 +22,7 @@ import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.activity.MainActivity;
 import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
 import com.example.mohamedniyaz.moviezapp.adapter.MoviesAdapter;
+import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
 import com.example.mohamedniyaz.moviezapp.modules.MovieResponse;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
@@ -55,7 +56,9 @@ public class MovieFragment extends Fragment {
     private  List<Movie> movies;
     private List<Movie> moviesList = new ArrayList<Movie>();
     RecyclerView recyclerView;
+    MoviesAdapter moviesAdapter;
     boolean recieved  = true;
+    private SqliteHelper sqliteHelper;
     int total =0;
     int lastVisibleItemCount =0;
 
@@ -127,16 +130,15 @@ public class MovieFragment extends Fragment {
 
                 Log.d(TAG, "onResponse: "+page);
                 moviesList.addAll(movies);
-                for(int  i =0; i<moviesList.size();i++){
-                    if(moviesList.get(i).getFavourite() == null) {
-                        moviesList.get(i).setFavourite(false);
-                    }
-                    Log.d(TAG, "MoviesList: "+ moviesList.get(i));
-                }
-                MoviesAdapter moviesAdapter = new MoviesAdapter(moviesList, R.layout.recycler_view_list, getActivity());
+//                for(int  i =0; i<moviesList.size();i++){
+//                    if(moviesList.get(i).getFavourite() == null) {
+//                        moviesList.get(i).setFavourite(false);
+//                    }
+//                    Log.d(TAG, "MoviesList: "+ moviesList.get(i));
+//                }
+                moviesAdapter = new MoviesAdapter(moviesList, R.layout.recycler_view_list, getActivity());
                 recyclerView.setAdapter(moviesAdapter);
                 recieved = true;
-                moviesAdapter.notifyDataSetChanged();
                 recyclerView.setMotionEventSplittingEnabled(false);
                 recyclerView.scrollToPosition(scrollPosition);
 
@@ -153,6 +155,22 @@ public class MovieFragment extends Fragment {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        boolean isFavourite = false;
+        Log.d(TAG, "onResume: ++ fragment");
+        if (sqliteHelper == null){
+            sqliteHelper = new SqliteHelper(getActivity());
+        }
+        for(int i = 0 ; i < moviesList.size() ; i ++ ) {
+            Log.d(TAG, "onResume: movie list " +moviesList.get(i).getFavourite() + "movie name" + moviesList.get(i).getOriginalTitle());
+            isFavourite = sqliteHelper.itsFavourite(moviesList.get(i).getId());
+            moviesList.get(i).setFavourite(isFavourite);
+        }
+        if (moviesAdapter != null) {
+            moviesAdapter.update(moviesList);
+        }
 
-
+    }
 }
