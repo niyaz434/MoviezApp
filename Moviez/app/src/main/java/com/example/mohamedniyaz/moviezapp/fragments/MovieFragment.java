@@ -1,30 +1,29 @@
 package com.example.mohamedniyaz.moviezapp.fragments;
 
+//TODO unused imports and variables (Shortcuts)
 
+import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.activity.MainActivity;
-import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
 import com.example.mohamedniyaz.moviezapp.adapter.MoviesAdapter;
 import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
+import com.example.mohamedniyaz.moviezapp.interfaces.AdapterFragment;
+import com.example.mohamedniyaz.moviezapp.interfaces.FragmentActivityCommunication;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
 import com.example.mohamedniyaz.moviezapp.modules.MovieResponse;
+import com.example.mohamedniyaz.moviezapp.moviezApp.AppConstants;
+import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
 import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -39,26 +38,22 @@ import retrofit2.Response;
 
 public class MovieFragment extends Fragment {
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Log.d(TAG, "onAttach: Attached");
-    }
-
     public static final String one = "movie_id";
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private SimpleDraweeView draweeView;
     // TODO - insert your themoviedb.org API KEY here
-    private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
+    //private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     public static  int page = 1;
     private String backdropPath;
-    private  List<Movie> movies;
+    private  List<Movie> movies = new ArrayList<>();
     private List<Movie> moviesList = new ArrayList<Movie>();
     RecyclerView recyclerView;
     MoviesAdapter moviesAdapter;
-    boolean recieved  = true;
+    boolean reachedLastPosition;
+    boolean isReloaded = false;
     private SqliteHelper sqliteHelper;
+    private FragmentActivityCommunication fragmentActivityCommunication;
     int total =0;
     int lastVisibleItemCount =0;
 
@@ -67,28 +62,44 @@ public class MovieFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //TODO major libraries need to be initialized in application class
         Fresco.initialize(getActivity());
-
-        if (API_KEY.isEmpty()) {
+        //TODO not required
+        if (AppConstants.API_KEY.isEmpty()) {
             Toast.makeText(getActivity(), "Please obtain your API KEY first from themoviedb.org", Toast.LENGTH_LONG).show();
         }
-
 
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "onAttach: Attached");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //TODO allignment shortcut
         Log.d(TAG, "onCreateView: OnCreateView");
 
         final View view  = inflater.inflate(R.layout.fragment_one,container,false);
 
         draweeView = (SimpleDraweeView) view.findViewById(R.id.my_image_view);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-       final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-       recyclerView.setLayoutManager(layoutManager);
-        loadData();
-        recyclerView.setMotionEventSplittingEnabled(false);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        moviesAdapter = new MoviesAdapter(movies, R.layout.recycler_view_list, getActivity(), new AdapterFragment() {
+            @Override
+            public void onItemClicked(int position) {
+                fragmentActivityCommunication = (FragmentActivityCommunication)getActivity();
+                fragmentActivityCommunication.movieId(position);
+                Log.d(TAG, "onItemClicked: " + position);
 
+            }
+        });
+        recyclerView.setAdapter(moviesAdapter);
+        recyclerView.setMotionEventSplittingEnabled(false);
+        loadData();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -100,12 +111,14 @@ public class MovieFragment extends Fragment {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                  total = layoutManager.getItemCount();
-                int firstVisibleItemCount = layoutManager.findFirstVisibleItemPosition();
+                //TODO not required
+               // int firstVisibleItemCount = layoutManager.findFirstVisibleItemPosition();
                 lastVisibleItemCount = layoutManager.findLastVisibleItemPosition();
-                if((recieved) && (total > 0) && ((total - 1) == lastVisibleItemCount)){
+                if((!reachedLastPosition) && (total > 0) && ((total - 1) == lastVisibleItemCount)){
                     page++;
                     loadData();
-                    recieved = false;
+                    //TODO isLoaded could be a better name
+                    reachedLastPosition = true;
                 }
             }
         });
@@ -114,34 +127,33 @@ public class MovieFragment extends Fragment {
 
     }
 
+
     public void loadData(){
-
-        final int scrollPosition = (lastVisibleItemCount);
-
-
         final ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
-        Call<MovieResponse> call = apiService.getResults(API_KEY,page);
+        Call<MovieResponse> call = apiService.getResults(AppConstants.API_KEY,page);
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                isReloaded = true;
                 //int statusCode = response.code();
                 movies = response.body().getResults();
 
                 Log.d(TAG, "onResponse: "+page);
-                moviesList.addAll(movies);
-//                for(int  i =0; i<moviesList.size();i++){
-//                    if(moviesList.get(i).getFavourite() == null) {
-//                        moviesList.get(i).setFavourite(false);
+                //TODO Not required handle at Entity
+                for(int  i =0; i<movies.size();i++){
+//                    if(movies.get(i).getFavourite() == null) {
+//                        movies.get(i).setFavourite(false);
 //                    }
-//                    Log.d(TAG, "MoviesList: "+ moviesList.get(i));
-//                }
-                moviesAdapter = new MoviesAdapter(moviesList, R.layout.recycler_view_list, getActivity());
-                recyclerView.setAdapter(moviesAdapter);
-                recieved = true;
+                    ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(), String.valueOf(movies.get(i)));
+                    Log.d(TAG, "MoviesList: "+ movies.get(i));
+                }
+                moviesList.addAll(movies);
+                if (moviesAdapter!= null){
+                    moviesAdapter.update(moviesList);
+                }
+                reachedLastPosition = false;
                 recyclerView.setMotionEventSplittingEnabled(false);
-                recyclerView.scrollToPosition(scrollPosition);
-
             }
 
             @Override
@@ -151,26 +163,27 @@ public class MovieFragment extends Fragment {
                 Log.e(TAG, t.toString());
             }
         });
-
-
     }
 
+    //TODO Not required to run a loop a select query should do
     @Override
     public void onResume() {
         super.onResume();
-        boolean isFavourite = false;
+        boolean isFavourite ;
         Log.d(TAG, "onResume: ++ fragment");
         if (sqliteHelper == null){
             sqliteHelper = new SqliteHelper(getActivity());
         }
-        for(int i = 0 ; i < moviesList.size() ; i ++ ) {
-            Log.d(TAG, "onResume: movie list " +moviesList.get(i).getFavourite() + "movie name" + moviesList.get(i).getOriginalTitle());
-            isFavourite = sqliteHelper.itsFavourite(moviesList.get(i).getId());
-            moviesList.get(i).setFavourite(isFavourite);
-        }
+        for (int i = 0; i < movies.size(); i++) {
+            Log.d(TAG, "onResume: movie list " + movies.get(i).getFavourite() + "movie name" + movies.get(i).getOriginalTitle());
+            isFavourite = sqliteHelper.getFavouriteMovies();
+            movies.get(i).setFavourite(isFavourite);
+            }
+
         if (moviesAdapter != null) {
             moviesAdapter.update(moviesList);
         }
 
     }
+
 }
