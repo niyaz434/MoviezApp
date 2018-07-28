@@ -1,5 +1,6 @@
 package com.example.mohamedniyaz.moviezapp.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mohamedniyaz.moviezapp.R;
-import com.example.mohamedniyaz.moviezapp.activity.MovieIdActivity;
+import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
 import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.MovieId;
@@ -24,6 +25,7 @@ import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,59 +33,55 @@ import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
 
-public class MovieResponseFragment extends Fragment{
+public class MovieResponseFragment extends Fragment {
+
+    //TODO Read about modifiers
+    //TODO Declare in separate lines
     TextView title,description,rating,rating_count,genre,language;
     SimpleDraweeView fresco_image;
     ArrayList<AdapterModel> arrayList = new ArrayList<>();
-
-    Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
+    List<MovieId> movieIdList = new ArrayList<>();
+    //TODO not required should be string
+    //TODO Use constant file
+    Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/");
     private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     public int movieId;
+    //TODO initialized variable for boolean is always false
+    boolean isFavourite = true;
+    private SqliteHelper sqliteHelper;
+    public String title_name;
 
+
+    public static Fragment newInstance(int movieId){
+        MovieResponseFragment movieResponseFragment = new MovieResponseFragment();
+        Bundle mBundle = new Bundle();
+        mBundle.putInt("MOVIE_ID",movieId);
+        movieResponseFragment.setArguments(mBundle);
+        return movieResponseFragment;
+    }
 
     @Override
     public void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle bundle = this.getArguments();
+        movieId = bundle.getInt("MOVIE_ID");
 
     }
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater,  ViewGroup container,  Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_two,container,false);
+        final View view = inflater.inflate(R.layout.fragment_two,container,false);
 
         final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsingToolbar);
 
         final FloatingActionButton fab;
-        final boolean[] flag = {true}; // true if first icon is visible, false if second one is visible.
 
-        fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        fab = view.findViewById(R.id.fab);
+        sqliteHelper = new SqliteHelper(getActivity());
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(flag[0]){
-
-                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
-                    flag[0] = false;
-
-                }else {
-
-                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
-                    flag[0] = true;
-
-                }
-
-            }
-        });
-
-
-
-
-
-
+        final boolean[] flag = {false}; // true if first icon is visible, false if second one is visible.
         description = (TextView)view.findViewById(R.id.description_text);
         rating  = (TextView)view.findViewById(R.id.rating_text);
         rating_count = (TextView)view.findViewById(R.id.rating_count_text);
@@ -92,18 +90,17 @@ public class MovieResponseFragment extends Fragment{
         language = (TextView)view.findViewById(R.id.language_text);
 
 
-        Intent intent = getActivity().getIntent();
-        int idNo = intent.getIntExtra("Int",0);
+//        Intent intent = getActivity().getIntent();
+//        movieId = intent.getIntExtra("Int",0);
 
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        Call<MovieId> call = apiService.getMovieDetails(idNo,API_KEY);
+        Call<MovieId> call = apiService.getMovieDetails(movieId,API_KEY);
         call.enqueue(new Callback<MovieId>() {
             @Override
             public void onResponse(Call<MovieId> call, Response<MovieId> response) {
-
-                String title_name = response.body().getOriginal_title();
+                title_name = response.body().getOriginal_title();
                 Log.d(TAG, "Title name: "+title_name);
                 String overview = response.body().getOverview();
                 float vote_average = response.body().getVote_average();
@@ -112,6 +109,7 @@ public class MovieResponseFragment extends Fragment{
                 int vote_count  = response.body().getVote_count();
                 String backdrop_path = response.body().getBackdropPath();
 
+                //TODO can use as class variable to avoid unwanted object creation and use meaningful names
                 StringBuilder stringBuilder = new StringBuilder();
                 StringBuilder stringBuilder1 = new StringBuilder();
 
@@ -122,7 +120,7 @@ public class MovieResponseFragment extends Fragment{
                     rating_count.setText(" "+vote_count);
                     fresco_image.setImageURI(uri + backdrop_path);
 
-
+                    //TODO Logutils to help differentiate between release and debug
                     System.out.println("Nope: "+overview);
                     System.out.println("Array"+genereClasses);
                     for(int j = 0;j<genereClasses.size();j++){
@@ -149,9 +147,38 @@ public class MovieResponseFragment extends Fragment{
                     language.setText(stringBuilder1.toString());
 
                 Log.d(TAG, "onResponse: ");
+                    if (isFavourite){
+                        isFavourite = false;
+                    }
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(!isFavourite){
+                                fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
+                                isFavourite = true;
+                                fab.setSelected(true);
+                                if (sqliteHelper.data(movieId)){
+                                    sqliteHelper.update(movieId, isFavourite);
+                                }else {
+                                    sqliteHelper.insert(movieId, title_name, isFavourite);
+                                }
+                            }else {
+                                fab.setSelected(false);
+                                isFavourite = false;
+                                fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
+                                sqliteHelper.update(movieId,isFavourite);
+                            }
 
+                        }
+                    });
+                    if(sqliteHelper.itsFavourite(movieId)){
+                        fab.setSelected(true);
+                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
+                    }else {
+                        fab.setSelected(false);
+                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+                    }
             }
-
             @Override
             public void onFailure(Call<MovieId> call, Throwable t) {
                 Log.d(TAG, "onFailure: ");
@@ -159,9 +186,13 @@ public class MovieResponseFragment extends Fragment{
                 Log.e(TAG, t.toString());
             }
         });
-
-
-
         return view;
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "onAttach: ++ ");
+    }
+
 }

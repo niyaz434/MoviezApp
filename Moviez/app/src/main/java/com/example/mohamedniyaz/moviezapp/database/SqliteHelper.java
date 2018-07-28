@@ -95,4 +95,41 @@ public class SqliteHelper extends SQLiteOpenHelper {
         return yesItis;
     }
 
+
+    //TODO proper naming convention, Background thread, Cursor open should always be close
+    public boolean itsFavourite(int movie_id){
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        int isTrue = 0;
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+ " WHERE " + COLUMN_MOVIE_ID + "=" + movie_id,null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    isTrue = cursor.getInt(2);
+                } while (cursor.moveToNext());
+            }
+        }
+        if(cursor != null){
+            cursor.close();
+        }
+        return isTrue == 1;
+
+    }
+
+    //changes for running a sqlite query
+    public boolean getFavouriteMovies(){
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        int moviePresent = 0;
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME,null);
+        if (cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    moviePresent = cursor.getInt(2);
+                }while (cursor.moveToNext());
+            }
+        }
+        if(cursor != null){
+            cursor.close();
+        }
+        return moviePresent == 1;
+    }
 }

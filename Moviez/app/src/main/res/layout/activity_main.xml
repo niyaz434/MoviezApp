@@ -4,14 +4,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:splitMotionEvents="false">
 
 
     <FrameLayout
     android:id="@+id/fragment_one_frame"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     </FrameLayout>
 
 </RelativeLayout>

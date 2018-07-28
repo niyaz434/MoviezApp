@@ -31,6 +31,17 @@ public class MovieId {
     @SerializedName("spoken_languages")
     private List<SpokenClass> spoken_languages;
 
+    private Boolean isFavourite =false ;
+
+
+    public Boolean getFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(Boolean favourite) {
+        isFavourite = favourite;
+    }
+
 
     public MovieId(String original_title, String overview, float vote_average, int vote_count, List<GenereClass> genres, String backdropPath, List<SpokenClass> spoken_languages) {
         this.original_title = original_title;
