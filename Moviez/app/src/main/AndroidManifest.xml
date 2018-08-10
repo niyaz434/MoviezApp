@@ -9,12 +9,11 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:name=".moviezApp.MoviezApp"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:name=".moviezApp.ConstantMethods"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        >
-        <activity android:name=".activity.MainActivity">
+        android:theme="@style/AppTheme">
+        <activity android:name=".activity.MovieActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

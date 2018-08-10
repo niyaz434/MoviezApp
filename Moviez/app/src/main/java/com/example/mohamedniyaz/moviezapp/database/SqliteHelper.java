@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
 
 
 public class SqliteHelper extends SQLiteOpenHelper {
@@ -13,7 +14,6 @@ public class SqliteHelper extends SQLiteOpenHelper {
     //Database name and version details
     private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME =  "MovieDatabase.db";
-
     //Table details
     private static final String TABLE_NAME = "FAVOURITE_MOVIES";
     private static final String COLUMN_MOVIE_ID = "MOVIE_ID";
@@ -88,6 +88,9 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 }while (cursor.moveToNext());
             }
         }
+        if (cursor != null){
+            cursor.close();
+        }
         if (yesMovieID == movie_id){
             yesItis = true;
         }else
@@ -97,7 +100,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
 
 
     //TODO proper naming convention, Background thread, Cursor open should always be close
-    public boolean itsFavourite(int movie_id){
+    public boolean isMovieFavourite(int movie_id){
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         int isTrue = 0;
         Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+ " WHERE " + COLUMN_MOVIE_ID + "=" + movie_id,null);
@@ -113,23 +116,25 @@ public class SqliteHelper extends SQLiteOpenHelper {
         }
         return isTrue == 1;
 
-    }
+    }      
 
     //changes for running a sqlite query
-    public boolean getFavouriteMovies(){
+    public ArrayList<Integer> getFavouriteMovies(){
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        int moviePresent = 0;
-        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME,null);
+        ArrayList<Integer> movieIdFavourite = new ArrayList<>();
+        int movieId;
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ISFAVOURITE + "=" + "0",null);
         if (cursor != null){
             if (cursor.moveToFirst()){
                 do {
-                    moviePresent = cursor.getInt(2);
+                    movieId = cursor.getInt(0);
+                    movieIdFavourite.add(movieId);
                 }while (cursor.moveToNext());
             }
         }
         if(cursor != null){
             cursor.close();
         }
-        return moviePresent == 1;
+        return movieIdFavourite;
     }
 }

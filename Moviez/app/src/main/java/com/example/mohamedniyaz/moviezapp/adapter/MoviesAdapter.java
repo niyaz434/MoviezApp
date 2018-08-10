@@ -89,7 +89,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         else{
             holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
         }
-//        if(sqliteHelper.itsFavourite(movies.get(position).getId())){
+//        if(sqliteHelper.isMovieFavourite(movies.get(position).getId())){
 //            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
 //        }else {
 //            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
@@ -100,9 +100,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                if (!isChecked) {
-                    movies.get(position).setFavourite(false);
-                }
+//                if (!isChecked) {
+//                    movies.get(position).setFavourite(false);
+//                }
                 if(movies.get(position).getFavourite()){
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
                   if (sqliteHelper.data(movies.get(position).getId())) {

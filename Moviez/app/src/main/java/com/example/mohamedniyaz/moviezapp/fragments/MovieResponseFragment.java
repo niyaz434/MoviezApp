@@ -1,7 +1,6 @@
 package com.example.mohamedniyaz.moviezapp.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -171,7 +170,7 @@ public class MovieResponseFragment extends Fragment {
 
                         }
                     });
-                    if(sqliteHelper.itsFavourite(movieId)){
+                    if(sqliteHelper.isMovieFavourite(movieId)){
                         fab.setSelected(true);
                         fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
                     }else {
