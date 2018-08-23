@@ -171,7 +171,6 @@ public class MovieFragment extends Fragment {
                 }
             }
         }
-
         if (moviesAdapter != null) {
             moviesAdapter.update(moviesList);
         }

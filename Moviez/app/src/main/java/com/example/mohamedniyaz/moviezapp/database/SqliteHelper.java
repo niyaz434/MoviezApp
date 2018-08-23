@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
+
 import java.util.ArrayList;
 
 
@@ -72,69 +74,83 @@ public class SqliteHelper extends SQLiteOpenHelper {
         }
     }
 
-    public int isTrue (boolean isFavourite){
+    private int isTrue (boolean isFavourite){
         return isFavourite ? 1 : 0 ;
     }
 
-    public boolean data(int movie_id){
-        int yesMovieID = 0 ;
-        boolean yesItis = false;
-        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ID + " = " + movie_id,null);
-        if (cursor != null){
-            if (cursor.moveToFirst()){
-                do{
-                    yesMovieID = cursor.getInt(0);
-                }while (cursor.moveToNext());
+    public boolean data(final int movie_id){
+        final int[] yesMovieID = {0};
+        final boolean[] yesItis = {false};
+        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        ConstantMethods.newInstance().getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ID + " = " + movie_id,null);
+                if (cursor != null){
+                    if (cursor.moveToFirst()){
+                        do{
+                            yesMovieID[0] = cursor.getInt(0);
+                        }while (cursor.moveToNext());
+                    }
+                }
+                if (cursor != null){
+                    cursor.close();
+                }
+                if (yesMovieID[0] == movie_id){
+                    yesItis[0] = true;
+                }else
+                    yesItis[0] = false;
             }
-        }
-        if (cursor != null){
-            cursor.close();
-        }
-        if (yesMovieID == movie_id){
-            yesItis = true;
-        }else
-            yesItis = false;
-        return yesItis;
+        });
+        return yesItis[0];
     }
 
 
     //TODO proper naming convention, Background thread, Cursor open should always be close
-    public boolean isMovieFavourite(int movie_id){
-        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        int isTrue = 0;
-        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+ " WHERE " + COLUMN_MOVIE_ID + "=" + movie_id,null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    isTrue = cursor.getInt(2);
-                } while (cursor.moveToNext());
+    public boolean isMovieFavourite(final int movie_id){
+        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        final int isTrue[] = {1};
+        ConstantMethods.newInstance().getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+ " WHERE " + COLUMN_MOVIE_ID + "=" + movie_id,null);
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        do {
+                            isTrue[0] = cursor.getInt(2);
+                        } while (cursor.moveToNext());
+                    }
+                }
+                if(cursor != null){
+                    cursor.close();
+                }
             }
-        }
-        if(cursor != null){
-            cursor.close();
-        }
-        return isTrue == 1;
-
+        });
+        return isTrue[0] == 1;
     }      
 
     //changes for running a sqlite query
     public ArrayList<Integer> getFavouriteMovies(){
-        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-        ArrayList<Integer> movieIdFavourite = new ArrayList<>();
-        int movieId;
-        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ISFAVOURITE + "=" + "0",null);
-        if (cursor != null){
-            if (cursor.moveToFirst()){
-                do {
-                    movieId = cursor.getInt(0);
-                    movieIdFavourite.add(movieId);
-                }while (cursor.moveToNext());
+        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        final ArrayList<Integer> movieIdFavourite = new ArrayList<>();
+        final int[] movieId = new int[1];
+        ConstantMethods.newInstance().getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ISFAVOURITE + "=" + "0",null);
+                if (cursor != null){
+                    if (cursor.moveToFirst()){
+                        do {
+                            movieId[0] = cursor.getInt(0);
+                            movieIdFavourite.add(movieId[0]);
+                        }while (cursor.moveToNext());
+                    }
+                }
+                if(cursor != null){
+                    cursor.close();
+                }
             }
-        }
-        if(cursor != null){
-            cursor.close();
-        }
+        });
         return movieIdFavourite;
     }
 }
