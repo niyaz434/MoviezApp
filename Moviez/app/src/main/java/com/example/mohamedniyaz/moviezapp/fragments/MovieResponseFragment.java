@@ -15,10 +15,12 @@ import android.widget.TextView;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
+import com.example.mohamedniyaz.moviezapp.interfaces.HandlerResultListener;
 import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.MovieId;
 import com.example.mohamedniyaz.moviezapp.modules.SpokenClass;
+import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
 import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -156,11 +158,23 @@ public class MovieResponseFragment extends Fragment {
                                 fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
                                 isFavourite = true;
                                 fab.setSelected(true);
-                                if (sqliteHelper.data(movieId)){
-                                    sqliteHelper.update(movieId, isFavourite);
-                                }else {
-                                    sqliteHelper.insert(movieId, title_name, isFavourite);
-                                }
+//                                if (sqliteHelper.data(movieId)){
+//                                    sqliteHelper.update(movieId, isFavourite);
+//                                }else {
+//                                    sqliteHelper.insert(movieId, title_name, isFavourite);
+//                                }
+
+                                sqliteHelper.data(new HandlerResultListener() {
+                                    @Override
+                                    public void onResult(Object... object) {
+                                        boolean movieAlreadyPresent = (boolean)object[0];
+                                        if (movieAlreadyPresent){
+                                            sqliteHelper.update(movieId, isFavourite);
+                                        }else {
+                                            sqliteHelper.insert(movieId, title_name, isFavourite);
+                                        }
+                                    }
+                                },movieId);
                             }else {
                                 fab.setSelected(false);
                                 isFavourite = false;
@@ -170,13 +184,28 @@ public class MovieResponseFragment extends Fragment {
 
                         }
                     });
-                    if(sqliteHelper.isMovieFavourite(movieId)){
-                        fab.setSelected(true);
-                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
-                    }else {
-                        fab.setSelected(false);
-                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+//                    if(sqliteHelper.isMovieFavourite(movieId)){
+//                        fab.setSelected(true);
+//                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
+//                    }else {
+//                        fab.setSelected(false);
+//                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+//                    }
+
+                sqliteHelper.isMovieFavouriteByHandler(new HandlerResultListener() {
+                    @Override
+                    public void onResult(Object... object) {
+                        boolean isMovieFavourite = (boolean) object[0];
+                        if (isMovieFavourite){
+                            fab.setSelected(true);
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
+                        }else {
+                            fab.setSelected(false);
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+                        }
+                        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"onBack Pressed ++" + isMovieFavourite);
                     }
+                },movieId);
             }
             @Override
             public void onFailure(Call<MovieId> call, Throwable t) {

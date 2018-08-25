@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.mohamedniyaz.moviezapp.interfaces.AdapterFragment;
+import com.example.mohamedniyaz.moviezapp.interfaces.HandlerResultListener;
 import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 
 import java.util.ArrayList;
@@ -105,6 +107,34 @@ public class SqliteHelper extends SQLiteOpenHelper {
         return yesItis[0];
     }
 
+    //implement interface for the data insert
+    public void data(final HandlerResultListener handlerResultListener, final int movieId){
+        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        ConstantMethods.newInstance().getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                int yesMovieId = 0;
+                boolean yesItIs;
+                Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ID + " = " + movieId,null);
+                if (cursor != null){
+                    if (cursor.moveToFirst()){
+                        do{
+                            yesMovieId = cursor.getInt(0);
+                        }while (cursor.moveToNext());
+                    }
+                }
+                if (cursor != null){
+                    cursor.close();
+                }
+                if (yesMovieId == movieId){
+                    yesItIs = true;
+                }else {
+                    yesItIs = false;
+                }
+                handlerResultListener.onResult(yesItIs);
+            }
+        });
+    }
 
     //TODO proper naming convention, Background thread, Cursor open should always be close
     public boolean isMovieFavourite(final int movie_id){
@@ -129,6 +159,29 @@ public class SqliteHelper extends SQLiteOpenHelper {
         return isTrue[0] == 1;
     }      
 
+    //implement interface for the ui thread update
+    public void isMovieFavouriteByHandler(final HandlerResultListener handlerResultListener, final int movie_id){
+        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        ConstantMethods.newInstance().getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                 int isTrue;
+                Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+ " WHERE " + COLUMN_MOVIE_ID + "=" + movie_id,null);
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        do {
+                            isTrue = cursor.getInt(2);
+                            handlerResultListener.onResult(isTrue == 1);
+                        } while (cursor.moveToNext());
+                    }
+                }
+                if(cursor != null){
+                    cursor.close();
+                }
+            }
+        });
+    }
+
     //changes for running a sqlite query
     public ArrayList<Integer> getFavouriteMovies(){
         final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
@@ -152,5 +205,29 @@ public class SqliteHelper extends SQLiteOpenHelper {
             }
         });
         return movieIdFavourite;
+    }
+
+    public void getFavouriteMovie(final HandlerResultListener handlerResultListener){
+        final SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        ConstantMethods.newInstance().getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Integer> movieIdFavourite = new ArrayList<>();
+                int movieId;
+                Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME + " WHERE " + COLUMN_MOVIE_ISFAVOURITE + "=" + "0",null);
+                if (cursor != null){
+                    if (cursor.moveToFirst()){
+                        do {
+                            movieId = cursor.getInt(0);
+                            movieIdFavourite.add(movieId);
+                        }while (cursor.moveToNext());
+                    }
+                }
+                if(cursor != null){
+                    cursor.close();
+                }
+                handlerResultListener.onResult(movieIdFavourite);
+            }
+        });
     }
 }

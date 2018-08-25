@@ -41,7 +41,7 @@ public class MovieActivity extends AppCompatActivity implements FragmentActivity
     public void movieId(int position) {
         Fragment fragment = MovieResponseFragment.newInstance(position);
         getFragmentManager().beginTransaction()
-                .add(R.id.fragment_one_frame,fragment)
+                .replace(R.id.fragment_one_frame,fragment)
                 .addToBackStack(MovieResponseFragment.class.getSimpleName()).commit();
         ConstantMethods.newInstance().printLogs(TAG, "movieId: " + position);
     }

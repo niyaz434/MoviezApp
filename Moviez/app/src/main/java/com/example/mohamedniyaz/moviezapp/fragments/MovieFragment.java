@@ -19,6 +19,7 @@ import com.example.mohamedniyaz.moviezapp.adapter.MoviesAdapter;
 import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
 import com.example.mohamedniyaz.moviezapp.interfaces.AdapterFragment;
 import com.example.mohamedniyaz.moviezapp.interfaces.FragmentActivityCommunication;
+import com.example.mohamedniyaz.moviezapp.interfaces.HandlerResultListener;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
 import com.example.mohamedniyaz.moviezapp.modules.MovieResponse;
 import com.example.mohamedniyaz.moviezapp.moviezApp.AppConstants;
@@ -45,7 +46,7 @@ public class MovieFragment extends Fragment {
     public static  int page = 1;
     private String backdropPath;
     private  List<Movie> movies = new ArrayList<>();
-    private List<Movie> moviesList = new ArrayList<Movie>();
+    private List<Movie> moviesList = new ArrayList<>();
     RecyclerView recyclerView;
     MoviesAdapter moviesAdapter;
     boolean reachedLastPosition;
@@ -138,6 +139,7 @@ public class MovieFragment extends Fragment {
                     Log.d(TAG, "MoviesList: "+ movies.get(i));
                 }
                 moviesList.addAll(movies);
+
                 if (moviesAdapter!= null){
                     moviesAdapter.update(moviesList);
                 }
@@ -158,23 +160,34 @@ public class MovieFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: ++ fragment");
+        Log.d(TAG, "onResume movie fragment ++");
         if (sqliteHelper == null){
             sqliteHelper = new SqliteHelper(getActivity());
         }
-        ArrayList<Integer> favouriteMoviesId = sqliteHelper.getFavouriteMovies();
-        for (int i = 0; i < moviesList.size(); i++) {
-            for (int j= 0 ; j < favouriteMoviesId.size() ; j++){
-                if (moviesList.get(i).getId() == favouriteMoviesId.get(j)) {
-                    ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(),"Movie Name" + moviesList.get(i).getId() + "Favourite id" + favouriteMoviesId.get(j));
-                    moviesList.get(i).setFavourite(true);
+        sqliteHelper.getFavouriteMovie(new HandlerResultListener() {
+            @Override
+            public void onResult(Object... object) {
+                ArrayList<Integer> favouriteMovieId = (ArrayList<Integer>) object[0];
+                for (int i = 0; i < moviesList.size(); i++) {
+                    for (int j= 0 ; j < favouriteMovieId.size() ; j++){
+                        if (moviesList.get(i).getId() == favouriteMovieId.get(j)) {
+                            ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(),"Movie Name" + moviesList.get(i).getId() + "Favourite id" + favouriteMovieId.get(j));
+                            moviesList.get(i).setFavourite(true);
+                        }
+                    }
                 }
             }
-        }
+        });
         if (moviesAdapter != null) {
             moviesAdapter.update(moviesList);
         }
-
+        Log.d(TAG, "onResume movie fragment --");
     }
 
+    @Override
+    public void onStop() {
+        Log.d(TAG, "onStop: " + moviesList.size());
+        super.onStop();
+        moviesList.clear();
+    }
 }

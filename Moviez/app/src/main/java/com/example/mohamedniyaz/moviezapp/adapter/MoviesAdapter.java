@@ -17,7 +17,9 @@ import android.widget.ToggleButton;
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
 import com.example.mohamedniyaz.moviezapp.interfaces.AdapterFragment;
+import com.example.mohamedniyaz.moviezapp.interfaces.HandlerResultListener;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
+import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.List;
@@ -75,9 +77,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
 
     public void update(List<Movie> moviesList){
+        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"update ++");
         this.movies = moviesList;
         notifyDataSetChanged();
-        Log.d(TAG, "update: ++ ");
+        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"update ++");
     }
 
     @Override
@@ -88,13 +91,26 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         holder.toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                movies.get(position).setFavourite(isChecked);
                 if(movies.get(position).getFavourite()){
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-                  if (sqliteHelper.data(movies.get(position).getId())) {
-                      sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
-                  }else {
-                      sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
-                  }
+//                  if (sqliteHelper.data(movies.get(position).getId())) {
+//                      sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
+//                  }else {
+//                      sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
+//                  }
+
+                    sqliteHelper.data(new HandlerResultListener() {
+                        @Override
+                        public void onResult(Object... object) {
+                            boolean movieAlreadyPresent = (boolean)object[0];
+                            if (movieAlreadyPresent){
+                                sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
+                            }else {
+                                sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
+                            }
+                        }
+                    },movies.get(position).getId());
                 }
                 else{
                     holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
@@ -105,11 +121,24 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             }
         });
 
-        if(sqliteHelper.isMovieFavourite(movies.get(position).getId())){
-            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-        }else {
-            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
-        }
+//        if(sqliteHelper.isMovieFavourite(movies.get(position).getId())){
+//            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+//        }else {
+//            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+//        }
+
+        sqliteHelper.isMovieFavouriteByHandler(new HandlerResultListener() {
+            @Override
+            public void onResult(Object... object) {
+                boolean isMovieFavourite = (boolean) object[0];
+                if (isMovieFavourite){
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+                }else {
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+                }
+                ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"normal check ++" + isMovieFavourite);
+            }
+        },movies.get(position).getId());
 
         holder.movie_title.setText(movies.get(position).getTitle());
         holder.draweeView.setImageURI(uri + movies.get(position).getBackdropPath());
