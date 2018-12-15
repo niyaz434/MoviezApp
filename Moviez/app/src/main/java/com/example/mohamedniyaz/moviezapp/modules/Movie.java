@@ -63,6 +63,7 @@ public class Movie {
         this.voteCount = voteCount;
         this.video = video;
         this.voteAverage = voteAverage;
+        this.isFavourite = false;
     }
 
 

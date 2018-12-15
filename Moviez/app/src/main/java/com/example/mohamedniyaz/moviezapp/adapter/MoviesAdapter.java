@@ -34,7 +34,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private AdapterFragment adapterFragment;
     //private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     private long mLastClickTime = 0;
-    Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/" );
+    Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/");
 
     public MoviesAdapter(Context context) {
         this.context = context;
@@ -51,16 +51,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
         public MovieViewHolder(View v) {
             super(v);
-            movieslayout = (RelativeLayout) v.findViewById(R.id.movies_layout);
-            movie_title = (TextView) v.findViewById(R.id.movie_title);
-            draweeView= (SimpleDraweeView) v.findViewById(R.id.my_image_view);
-            rating_textview = (TextView)v.findViewById(R.id.rating_bar);
-            toggleButton = (ToggleButton)v.findViewById(R.id.myToggleButton);
+            movieslayout = v.findViewById(R.id.movies_layout);
+            movie_title = v.findViewById(R.id.movie_title);
+            draweeView = v.findViewById(R.id.my_image_view);
+            rating_textview = v.findViewById(R.id.rating_bar);
+            toggleButton = v.findViewById(R.id.myToggleButton);
 
         }
     }
 
-    public MoviesAdapter(List<Movie> movies, int list_item, Context context, AdapterFragment adapterFragment) {
+    public MoviesAdapter(List<Movie> movies, Context context, AdapterFragment adapterFragment) {
         this.movies = movies;
         this.context = context;
         this.adapterFragment = adapterFragment;
@@ -76,24 +76,24 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
 
-    public void update(List<Movie> moviesList){
-        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"update ++");
+    public void update(List<Movie> moviesList) {
+        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(), "update ++");
         this.movies = moviesList;
         notifyDataSetChanged();
-        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"update ++");
+        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(), "update --");
     }
 
     @Override
     public void onBindViewHolder(final MovieViewHolder holder, final int position) {
-        Log.d(TAG, "onBindViewHolder: "+position);
+        Log.d(TAG, "onBindViewHolder: " + position);
 
         //TODO use button with selector
         holder.toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 movies.get(position).setFavourite(isChecked);
-                if(movies.get(position).getFavourite()){
-                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
+                if (movies.get(position).getFavourite()) {
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favourite));
 //                  if (sqliteHelper.data(movies.get(position).getId())) {
 //                      sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
 //                  }else {
@@ -103,18 +103,17 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                     sqliteHelper.data(new HandlerResultListener() {
                         @Override
                         public void onResult(Object... object) {
-                            boolean movieAlreadyPresent = (boolean)object[0];
-                            if (movieAlreadyPresent){
+                            boolean movieAlreadyPresent = (boolean) object[0];
+                            if (movieAlreadyPresent) {
                                 sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
-                            }else {
+                            } else {
                                 sqliteHelper.insert(movies.get(position).getId(), movies.get(position).getTitle(), movies.get(position).getFavourite());
                             }
                         }
-                    },movies.get(position).getId());
-                }
-                else{
-                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
-                    sqliteHelper.update(movies.get(position).getId(),movies.get(position).getFavourite());
+                    }, movies.get(position).getId());
+                } else {
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favourite_border));
+                    sqliteHelper.update(movies.get(position).getId(), movies.get(position).getFavourite());
                     System.out.println(isChecked);
                 }
 
@@ -127,18 +126,24 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 //            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
 //        }
 
-        sqliteHelper.isMovieFavouriteByHandler(new HandlerResultListener() {
+        if (movies.get(position).getFavourite()) {
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favourite));
+        } else {
+            holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favourite_border));
+        }
+
+        /*sqliteHelper.isMovieFavouriteByHandler(new HandlerResultListener() {
             @Override
             public void onResult(Object... object) {
                 boolean isMovieFavourite = (boolean) object[0];
-                if (isMovieFavourite){
-                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite));
-                }else {
-                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context,R.drawable.ic_favourite_border));
+                if (isMovieFavourite) {
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favourite));
+                } else {
+                    holder.toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ic_favourite_border));
                 }
-                ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"normal check ++" + isMovieFavourite);
+                ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(), "normal check ++" + isMovieFavourite);
             }
-        },movies.get(position).getId());
+        }, movies.get(position).getId());*/
 
         holder.movie_title.setText(movies.get(position).getTitle());
         holder.draweeView.setImageURI(uri + movies.get(position).getBackdropPath());
@@ -146,9 +151,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         holder.movieslayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if(SystemClock.elapsedRealtime() - mLastClickTime<1000){
-                    return;
-                }
                 mLastClickTime = SystemClock.elapsedRealtime();
                 int id = movies.get(position).getId();
                 adapterFragment.onItemClicked(id);
@@ -159,6 +161,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             }
         });
     }
+
     @Override
     public int getItemCount() {
         return movies.size();
