@@ -33,19 +33,24 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
+import static com.example.mohamedniyaz.moviezapp.moviezApp.AppConstants.API_KEY;
 
 public class MovieResponseFragment extends Fragment {
 
     //TODO Read about modifiers
     //TODO Declare in separate lines
-    TextView title,description,rating,rating_count,genre,language;
+    TextView title;
+    TextView description;
+    TextView rating;
+    TextView rating_count;
+    TextView genre;
+    TextView language;
     SimpleDraweeView fresco_image;
     ArrayList<AdapterModel> arrayList = new ArrayList<>();
     List<MovieId> movieIdList = new ArrayList<>();
     //TODO not required should be string
     //TODO Use constant file
     Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/");
-    private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     public int movieId;
     //TODO initialized variable for boolean is always false
     boolean isFavourite = true;
@@ -73,9 +78,9 @@ public class MovieResponseFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        final View view = inflater.inflate(R.layout.fragment_two,container,false);
+        final View view = inflater.inflate(R.layout.fragment_moviez_details,container,false);
 
-        final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsingToolbar);
+        final CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapsingToolbar);
 
         final FloatingActionButton fab;
 
@@ -83,12 +88,12 @@ public class MovieResponseFragment extends Fragment {
         sqliteHelper = new SqliteHelper(getActivity());
 
         final boolean[] flag = {false}; // true if first icon is visible, false if second one is visible.
-        description = (TextView)view.findViewById(R.id.description_text);
-        rating  = (TextView)view.findViewById(R.id.rating_text);
-        rating_count = (TextView)view.findViewById(R.id.rating_count_text);
-        genre = (TextView)view.findViewById(R.id.genre_text);
-        fresco_image = (SimpleDraweeView)view.findViewById(R.id.toolbarImage) ;
-        language = (TextView)view.findViewById(R.id.language_text);
+        description = view.findViewById(R.id.description_text);
+        rating  = view.findViewById(R.id.rating_text);
+        rating_count = view.findViewById(R.id.rating_count_text);
+        genre = view.findViewById(R.id.genre_text);
+        fresco_image = view.findViewById(R.id.toolbarImage);
+        language = view.findViewById(R.id.language_text);
 
 
 //        Intent intent = getActivity().getIntent();

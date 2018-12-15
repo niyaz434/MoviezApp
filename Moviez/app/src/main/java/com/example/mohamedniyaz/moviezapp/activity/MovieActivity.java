@@ -42,7 +42,7 @@ public class MovieActivity extends AppCompatActivity implements FragmentActivity
         Fragment fragment = MovieResponseFragment.newInstance(position);
         getFragmentManager().beginTransaction()
                 .replace(R.id.fragment_one_frame,fragment)
-                .addToBackStack(MovieResponseFragment.class.getSimpleName()).commit();
+                .addToBackStack(null).commit();
         ConstantMethods.newInstance().printLogs(TAG, "movieId: " + position);
     }
 
@@ -50,10 +50,10 @@ public class MovieActivity extends AppCompatActivity implements FragmentActivity
     public void onBackPressed() {
         super.onBackPressed();
         int count = getFragmentManager().getBackStackEntryCount();
-        if (count > 0) {
+       /* if (count > 0) {
             ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),MovieFragment.class.getSimpleName());
             getFragmentManager().popBackStackImmediate(MovieFragment.class.getSimpleName(),0);
-        }
+        }*/
         ConstantMethods.newInstance().printLogs(TAG, "onBackPressed: " + count);
     }
 }

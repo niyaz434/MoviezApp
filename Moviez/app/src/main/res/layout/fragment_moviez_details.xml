@@ -165,6 +165,9 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:src="@drawable/button_favourite"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:focusedByDefault="false"
         android:scaleType="center"
         app:layout_anchor="@id/appBar"
         app:layout_anchorGravity="bottom|end" />
