@@ -1,7 +1,6 @@
 package com.example.mohamedniyaz.moviezapp.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -16,10 +15,12 @@ import android.widget.TextView;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
+import com.example.mohamedniyaz.moviezapp.interfaces.HandlerResultListener;
 import com.example.mohamedniyaz.moviezapp.modules.AdapterModel;
 import com.example.mohamedniyaz.moviezapp.modules.GenereClass;
 import com.example.mohamedniyaz.moviezapp.modules.MovieId;
 import com.example.mohamedniyaz.moviezapp.modules.SpokenClass;
+import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
 import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -32,19 +33,24 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
+import static com.example.mohamedniyaz.moviezapp.moviezApp.AppConstants.API_KEY;
 
 public class MovieResponseFragment extends Fragment {
 
     //TODO Read about modifiers
     //TODO Declare in separate lines
-    TextView title,description,rating,rating_count,genre,language;
+    TextView title;
+    TextView description;
+    TextView rating;
+    TextView rating_count;
+    TextView genre;
+    TextView language;
     SimpleDraweeView fresco_image;
     ArrayList<AdapterModel> arrayList = new ArrayList<>();
     List<MovieId> movieIdList = new ArrayList<>();
     //TODO not required should be string
     //TODO Use constant file
     Uri uri = Uri.parse("https://image.tmdb.org/t/p/w500/");
-    private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     public int movieId;
     //TODO initialized variable for boolean is always false
     boolean isFavourite = true;
@@ -72,9 +78,9 @@ public class MovieResponseFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        final View view = inflater.inflate(R.layout.fragment_two,container,false);
+        final View view = inflater.inflate(R.layout.fragment_moviez_details,container,false);
 
-        final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsingToolbar);
+        final CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapsingToolbar);
 
         final FloatingActionButton fab;
 
@@ -82,12 +88,12 @@ public class MovieResponseFragment extends Fragment {
         sqliteHelper = new SqliteHelper(getActivity());
 
         final boolean[] flag = {false}; // true if first icon is visible, false if second one is visible.
-        description = (TextView)view.findViewById(R.id.description_text);
-        rating  = (TextView)view.findViewById(R.id.rating_text);
-        rating_count = (TextView)view.findViewById(R.id.rating_count_text);
-        genre = (TextView)view.findViewById(R.id.genre_text);
-        fresco_image = (SimpleDraweeView)view.findViewById(R.id.toolbarImage) ;
-        language = (TextView)view.findViewById(R.id.language_text);
+        description = view.findViewById(R.id.description_text);
+        rating  = view.findViewById(R.id.rating_text);
+        rating_count = view.findViewById(R.id.rating_count_text);
+        genre = view.findViewById(R.id.genre_text);
+        fresco_image = view.findViewById(R.id.toolbarImage);
+        language = view.findViewById(R.id.language_text);
 
 
 //        Intent intent = getActivity().getIntent();
@@ -157,11 +163,23 @@ public class MovieResponseFragment extends Fragment {
                                 fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
                                 isFavourite = true;
                                 fab.setSelected(true);
-                                if (sqliteHelper.data(movieId)){
-                                    sqliteHelper.update(movieId, isFavourite);
-                                }else {
-                                    sqliteHelper.insert(movieId, title_name, isFavourite);
-                                }
+//                                if (sqliteHelper.data(movieId)){
+//                                    sqliteHelper.update(movieId, isFavourite);
+//                                }else {
+//                                    sqliteHelper.insert(movieId, title_name, isFavourite);
+//                                }
+
+                                sqliteHelper.data(new HandlerResultListener() {
+                                    @Override
+                                    public void onResult(Object... object) {
+                                        boolean movieAlreadyPresent = (boolean)object[0];
+                                        if (movieAlreadyPresent){
+                                            sqliteHelper.update(movieId, isFavourite);
+                                        }else {
+                                            sqliteHelper.insert(movieId, title_name, isFavourite);
+                                        }
+                                    }
+                                },movieId);
                             }else {
                                 fab.setSelected(false);
                                 isFavourite = false;
@@ -171,13 +189,28 @@ public class MovieResponseFragment extends Fragment {
 
                         }
                     });
-                    if(sqliteHelper.itsFavourite(movieId)){
-                        fab.setSelected(true);
-                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
-                    }else {
-                        fab.setSelected(false);
-                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+//                    if(sqliteHelper.isMovieFavourite(movieId)){
+//                        fab.setSelected(true);
+//                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
+//                    }else {
+//                        fab.setSelected(false);
+//                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+//                    }
+
+                sqliteHelper.isMovieFavouriteByHandler(new HandlerResultListener() {
+                    @Override
+                    public void onResult(Object... object) {
+                        boolean isMovieFavourite = (boolean) object[0];
+                        if (isMovieFavourite){
+                            fab.setSelected(true);
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
+                        }else {
+                            fab.setSelected(false);
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+                        }
+                        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"onBack Pressed ++" + isMovieFavourite);
                     }
+                },movieId);
             }
             @Override
             public void onFailure(Call<MovieId> call, Throwable t) {

@@ -37,15 +37,15 @@ public class Movie {
     @SerializedName("vote_average")
     private Double voteAverage;
 
-    private Boolean isFavourite =false ;
+    private boolean isFavourite;
 
 
-    public Boolean getFavourite() {
-        return isFavourite;
+    public boolean getFavourite() {
+        return this.isFavourite;
     }
 
-    public void setFavourite(Boolean favourite) {
-        isFavourite = favourite;
+    public void setFavourite(boolean favourite) {
+        this.isFavourite = favourite;
     }
 
     public Movie(String posterPath, boolean adult, String overview, String releaseDate, List<Integer> genreIds, Integer id, String originalTitle, String originalLanguage, String title, String backdropPath, Double popularity, Integer voteCount, Boolean video, Double voteAverage) {
@@ -63,6 +63,7 @@ public class Movie {
         this.voteCount = voteCount;
         this.video = video;
         this.voteAverage = voteAverage;
+        this.isFavourite = false;
     }
 
 

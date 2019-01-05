@@ -1,12 +1,15 @@
 package com.example.mohamedniyaz.moviezapp.moviezApp;
 
-import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
-public class ConstantMethods extends Application {
 
-    public  final String LOG = "Moviez App Logs : ";
-    public static ConstantMethods constantMethods = null;
+public class ConstantMethods {
+
+    private final String TAG = "Moviez App Logs : ";
+    private static ConstantMethods constantMethods = null;
+    private Handler mHandler = null;
 
     public static ConstantMethods newInstance(){
         if (constantMethods == null){
@@ -16,6 +19,15 @@ public class ConstantMethods extends Application {
     }
 
     public void printLogs(String className, String log){
-        Log.d(LOG, className + "::" + log);
+        if (AppConstants.LOG) {
+            Log.d(TAG, className + "::" + log);
+        }
+    }
+
+    public Handler getHandler(){
+        if (mHandler == null){
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        return mHandler;
     }
 }

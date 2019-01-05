@@ -13,8 +13,7 @@ import com.example.mohamedniyaz.moviezapp.interfaces.FragmentActivityCommunicati
 import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 
 // TODO Reasonable naming
-public class MainActivity extends AppCompatActivity implements FragmentActivityCommunication {
-
+public class MovieActivity extends AppCompatActivity implements FragmentActivityCommunication {
     public static final String TAG = "MainAvtivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +41,8 @@ public class MainActivity extends AppCompatActivity implements FragmentActivityC
     public void movieId(int position) {
         Fragment fragment = MovieResponseFragment.newInstance(position);
         getFragmentManager().beginTransaction()
-                .add(R.id.fragment_one_frame,fragment)
-                .addToBackStack(MovieResponseFragment.class.getSimpleName()).commit();
+                .replace(R.id.fragment_one_frame,fragment)
+                .addToBackStack(null).commit();
         ConstantMethods.newInstance().printLogs(TAG, "movieId: " + position);
     }
 
@@ -51,10 +50,10 @@ public class MainActivity extends AppCompatActivity implements FragmentActivityC
     public void onBackPressed() {
         super.onBackPressed();
         int count = getFragmentManager().getBackStackEntryCount();
-        if (count > 0) {
-            ConstantMethods.newInstance().printLogs(this.getLocalClassName(),MovieFragment.class.getSimpleName());
+       /* if (count > 0) {
+            ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),MovieFragment.class.getSimpleName());
             getFragmentManager().popBackStackImmediate(MovieFragment.class.getSimpleName(),0);
-        }
+        }*/
         ConstantMethods.newInstance().printLogs(TAG, "onBackPressed: " + count);
     }
 }
