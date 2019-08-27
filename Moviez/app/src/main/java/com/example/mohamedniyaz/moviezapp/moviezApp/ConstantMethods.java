@@ -4,6 +4,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.example.mohamedniyaz.moviezapp.repository.MovieRepository;
+import com.example.mohamedniyaz.moviezapp.roomDatabase.MovieDatabase;
+
 
 public class ConstantMethods {
 
@@ -30,4 +33,5 @@ public class ConstantMethods {
         }
         return mHandler;
     }
+
 }

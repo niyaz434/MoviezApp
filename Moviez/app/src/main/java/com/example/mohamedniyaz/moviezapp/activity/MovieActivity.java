@@ -1,10 +1,11 @@
 package com.example.mohamedniyaz.moviezapp.activity;
 
-import android.app.FragmentManager;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.fragments.MovieFragment;
@@ -14,15 +15,16 @@ import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 
 // TODO Reasonable naming
 public class MovieActivity extends AppCompatActivity implements FragmentActivityCommunication {
-    public static final String TAG = "MainAvtivity";
+    public static final String TAG = "MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ConstantMethods.newInstance().printLogs("onCreate", "onCreate:  ++ ");
         Fragment fragment = new MovieFragment();
-        if(fragment!=null) {
-            FragmentManager fragmentManager = getFragmentManager();
+        if (fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.add(R.id.fragment_one_frame, fragment);
             fragmentTransaction.addToBackStack(MovieFragment.class.getSimpleName());
@@ -40,8 +42,8 @@ public class MovieActivity extends AppCompatActivity implements FragmentActivity
     @Override
     public void movieId(int position) {
         Fragment fragment = MovieResponseFragment.newInstance(position);
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment_one_frame,fragment)
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_one_frame, fragment)
                 .addToBackStack(null).commit();
         ConstantMethods.newInstance().printLogs(TAG, "movieId: " + position);
     }

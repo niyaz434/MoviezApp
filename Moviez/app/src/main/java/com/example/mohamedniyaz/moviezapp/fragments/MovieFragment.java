@@ -2,10 +2,12 @@ package com.example.mohamedniyaz.moviezapp.fragments;
 
 //TODO unused imports and variables (Shortcuts)
 
-import android.app.Fragment;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -21,19 +23,12 @@ import com.example.mohamedniyaz.moviezapp.interfaces.AdapterFragment;
 import com.example.mohamedniyaz.moviezapp.interfaces.FragmentActivityCommunication;
 import com.example.mohamedniyaz.moviezapp.interfaces.HandlerResultListener;
 import com.example.mohamedniyaz.moviezapp.modules.Movie;
-import com.example.mohamedniyaz.moviezapp.modules.MovieResponse;
-import com.example.mohamedniyaz.moviezapp.moviezApp.AppConstants;
 import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
-import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
-import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
+import com.example.mohamedniyaz.moviezapp.viewModel.MoviesViewModel;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MovieFragment extends Fragment {
 
@@ -41,8 +36,6 @@ public class MovieFragment extends Fragment {
 
     private static final String TAG = MovieActivity.class.getSimpleName();
     private SimpleDraweeView draweeView;
-    // TODO - insert your themoviedb.org API KEY here
-    //private final static String API_KEY = "0e12101a22c608993caa890e9dabea92";
     public static int page = 1;
     private String backdropPath;
     private List<Movie> movies = new ArrayList<>();
@@ -55,14 +48,47 @@ public class MovieFragment extends Fragment {
     private FragmentActivityCommunication fragmentActivityCommunication;
     int total = 0;
     int lastVisibleItemCount = 0;
+    private MoviesViewModel moviesViewModel;
 
+    public MovieFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadData();
-        //TODO major libraries need to be initialized in application class
-        //TODO not required
+//        loadData();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+       /* moviesViewModel.getmMovieArrayList().observe(getActivity(), new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (movies != null) {
+                    isReloaded = true;
+                    for (int i = 0; i < movies.size(); i++) {
+                        ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(), String.valueOf(movies.get(i)));
+                        Log.d(TAG, "MoviesList: " + movies.get(i).getTitle());
+                    }
+                    moviesList.addAll(movies);
+                    if (moviesAdapter != null) {
+                        moviesAdapter.update(moviesList);
+                    }
+                    reachedLastPosition = false;
+                    recyclerView.setMotionEventSplittingEnabled(false);
+                } else {
+                    // do nothing
+                }
+            }
+        });    }*/
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        moviesViewModel = ViewModelProviders.of(getActivity()).get(MoviesViewModel.class);
+        loadMovies();
     }
 
     @Override
@@ -73,7 +99,6 @@ public class MovieFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //TODO allignment shortcut
         Log.d(TAG, "onCreateView: OnCreateView");
 
         final View view = inflater.inflate(R.layout.fragment_moviez_list, container, false);
@@ -105,13 +130,12 @@ public class MovieFragment extends Fragment {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 total = layoutManager.getItemCount();
-                //TODO not required
                 // int firstVisibleItemCount = layoutManager.findFirstVisibleItemPosition();
                 lastVisibleItemCount = layoutManager.findLastVisibleItemPosition();
                 if ((!reachedLastPosition) && (total > 0) && ((total - 1) == lastVisibleItemCount)) {
                     page++;
-                    loadData();
-                    //TODO isLoaded could be a better name
+                    loadMovies();
+//                    loadData();
                     reachedLastPosition = true;
                 }
             }
@@ -121,42 +145,44 @@ public class MovieFragment extends Fragment {
 
     }
 
-
-    public void loadData() {
-        final ApiInterface apiService =
-                ApiClient.getClient().create(ApiInterface.class);
-        Call<MovieResponse> call = apiService.getResults(AppConstants.API_KEY, page);
-        call.enqueue(new Callback<MovieResponse>() {
-            @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                isReloaded = true;
-                //int statusCode = response.code();
-                movies = response.body().getResults();
-
-                Log.d(TAG, "onResponse: " + page);
-                //TODO Not required handle at Entity
-                for (int i = 0; i < movies.size(); i++) {
-                    ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(), String.valueOf(movies.get(i)));
-                    Log.d(TAG, "MoviesList: " + movies.get(i).getTitle());
-                }
-                moviesList.addAll(movies);
-                if (moviesAdapter != null) {
-                    moviesAdapter.update(moviesList);
-                }
-                reachedLastPosition = false;
-                recyclerView.setMotionEventSplittingEnabled(false);
-            }
-
-            @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: ");
-                // Log error here since request failed
-                Log.e(TAG, t.toString());
-            }
-        });
+    //load data should call the movie repository class and then update the UI initially
+    public void loadMovies() {
+        moviesViewModel.fetchRecentMoviesApi(page);
     }
 
-    //TODO Not required to run a loop a select query should do
+//    public void loadData() {
+//        final ApiInterface apiService =
+//                ApiClient.getClient().create(ApiInterface.class);
+//        Call<MovieResponse> call = apiService.getResults(AppConstants.API_KEY, page);
+//        call.enqueue(new Callback<MovieResponse>() {
+//            @Override
+//            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+//                isReloaded = true;
+//                //int statusCode = response.code();
+//                movies = response.body().getResults();
+//
+//                Log.d(TAG, "onResponse: " + page);
+//                for (int i = 0; i < movies.size(); i++) {
+//                    ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(), String.valueOf(movies.get(i)));
+//                    Log.d(TAG, "MoviesList: " + movies.get(i).getTitle());
+//                }
+//                moviesList.addAll(movies);
+//                if (moviesAdapter != null) {
+//                    moviesAdapter.update(moviesList);
+//                }
+//                reachedLastPosition = false;
+//                recyclerView.setMotionEventSplittingEnabled(false);
+//            }
+//
+//            @Override
+//            public void onFailure(Call<MovieResponse> call, Throwable t) {
+//                Log.d(TAG, "onFailure: ");
+//                // Log error here since request failed
+//                Log.e(TAG, t.toString());
+//            }
+//        });
+//    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -184,13 +210,33 @@ public class MovieFragment extends Fragment {
                 }
             }
         });
+        moviesViewModel.getMovieArrayList().observe(getActivity(), new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (movies != null) {
+                    isReloaded = true;
+                    for (int i = 0; i < movies.size(); i++) {
+                        ConstantMethods.newInstance().printLogs(MovieFragment.class.getSimpleName(), String.valueOf(movies.get(i)));
+                        Log.d(TAG, "MoviesList: " + movies.get(i).getTitle());
+                    }
+                    moviesList.addAll(movies);
+                    if (moviesAdapter != null) {
+                        moviesAdapter.update(moviesList);
+                    }
+                    reachedLastPosition = false;
+                    recyclerView.setMotionEventSplittingEnabled(false);
+                } else {
+                    // do nothing
+                }
+            }
+        });
         Log.d(TAG, "onResume movie fragment --");
     }
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop: " + moviesList.size());
         super.onStop();
+        Log.d(TAG, "onStop: " + moviesList.size());
     }
 
     @Override
