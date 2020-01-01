@@ -3,15 +3,14 @@ package com.example.mohamedniyaz.moviezapp.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.database.SqliteHelper;
@@ -24,6 +23,8 @@ import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 import com.example.mohamedniyaz.moviezapp.rest.ApiClient;
 import com.example.mohamedniyaz.moviezapp.rest.ApiInterface;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,16 +59,16 @@ public class MovieResponseFragment extends Fragment {
     public String title_name;
 
 
-    public static Fragment newInstance(int movieId){
+    public static Fragment newInstance(int movieId) {
         MovieResponseFragment movieResponseFragment = new MovieResponseFragment();
         Bundle mBundle = new Bundle();
-        mBundle.putInt("MOVIE_ID",movieId);
+        mBundle.putInt("MOVIE_ID", movieId);
         movieResponseFragment.setArguments(mBundle);
         return movieResponseFragment;
     }
 
     @Override
-    public void onCreate( Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = this.getArguments();
         movieId = bundle.getInt("MOVIE_ID");
@@ -78,7 +79,7 @@ public class MovieResponseFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        final View view = inflater.inflate(R.layout.fragment_moviez_details,container,false);
+        final View view = inflater.inflate(R.layout.fragment_moviez_details, container, false);
 
         final CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapsingToolbar);
 
@@ -89,7 +90,7 @@ public class MovieResponseFragment extends Fragment {
 
         final boolean[] flag = {false}; // true if first icon is visible, false if second one is visible.
         description = view.findViewById(R.id.description_text);
-        rating  = view.findViewById(R.id.rating_text);
+        rating = view.findViewById(R.id.rating_text);
         rating_count = view.findViewById(R.id.rating_count_text);
         genre = view.findViewById(R.id.genre_text);
         fresco_image = view.findViewById(R.id.toolbarImage);
@@ -102,17 +103,17 @@ public class MovieResponseFragment extends Fragment {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        Call<MovieId> call = apiService.getMovieDetails(movieId,API_KEY);
+        Call<MovieId> call = apiService.getMovieDetails(movieId, API_KEY);
         call.enqueue(new Callback<MovieId>() {
             @Override
             public void onResponse(Call<MovieId> call, Response<MovieId> response) {
                 title_name = response.body().getOriginal_title();
-                Log.d(TAG, "Title name: "+title_name);
+                Log.d(TAG, "Title name: " + title_name);
                 String overview = response.body().getOverview();
                 float vote_average = response.body().getVote_average();
                 ArrayList<GenereClass> genereClasses = (ArrayList<GenereClass>) response.body().getGenres();
                 ArrayList<SpokenClass> spokenClasses = (ArrayList<SpokenClass>) response.body().getSpoken_languages();
-                int vote_count  = response.body().getVote_count();
+                int vote_count = response.body().getVote_count();
                 String backdrop_path = response.body().getBackdropPath();
 
                 //TODO can use as class variable to avoid unwanted object creation and use meaningful names
@@ -120,75 +121,75 @@ public class MovieResponseFragment extends Fragment {
                 StringBuilder stringBuilder1 = new StringBuilder();
 
 
-                    collapsingToolbarLayout.setTitle(title_name);
-                    description.setText(overview);
-                    rating.setText(" "+vote_average);
-                    rating_count.setText(" "+vote_count);
-                    fresco_image.setImageURI(uri + backdrop_path);
+                collapsingToolbarLayout.setTitle(title_name);
+                description.setText(overview);
+                rating.setText(" " + vote_average);
+                rating_count.setText(" " + vote_count);
+                fresco_image.setImageURI(uri + backdrop_path);
 
-                    //TODO Logutils to help differentiate between release and debug
-                    System.out.println("Nope: "+overview);
-                    System.out.println("Array"+genereClasses);
-                    for(int j = 0;j<genereClasses.size();j++){
-                        if (stringBuilder.length() > 0 ) {
-                            stringBuilder.append(", ");
-                        }
-
-                        stringBuilder.append(genereClasses.get(j).getName().toString());
-                        System.out.println("String Builder"+stringBuilder.toString());
-                        System.out.println("ArrayIn "+genereClasses.get(j).getName().toString());
+                //TODO Logutils to help differentiate between release and debug
+                System.out.println("Nope: " + overview);
+                System.out.println("Array" + genereClasses);
+                for (int j = 0; j < genereClasses.size(); j++) {
+                    if (stringBuilder.length() > 0) {
+                        stringBuilder.append(", ");
                     }
 
-                    for(int k =0; k < spokenClasses.size();k++){
-                        if(stringBuilder1.length() >0){
-                            stringBuilder1.append(", ");
-                        }
-                        stringBuilder1.append(spokenClasses.get(k).getName().toString());
+                    stringBuilder.append(genereClasses.get(j).getName().toString());
+                    System.out.println("String Builder" + stringBuilder.toString());
+                    System.out.println("ArrayIn " + genereClasses.get(j).getName().toString());
+                }
 
+                for (int k = 0; k < spokenClasses.size(); k++) {
+                    if (stringBuilder1.length() > 0) {
+                        stringBuilder1.append(", ");
                     }
+                    stringBuilder1.append(spokenClasses.get(k).getName().toString());
 
-                    stringBuilder.append('.');
-                    stringBuilder1.append('.');
-                    genre.setText(stringBuilder.toString());
-                    language.setText(stringBuilder1.toString());
+                }
+
+                stringBuilder.append('.');
+                stringBuilder1.append('.');
+                genre.setText(stringBuilder.toString());
+                language.setText(stringBuilder1.toString());
 
                 Log.d(TAG, "onResponse: ");
-                    if (isFavourite){
-                        isFavourite = false;
-                    }
-                    fab.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if(!isFavourite){
-                                fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
-                                isFavourite = true;
-                                fab.setSelected(true);
+                if (isFavourite) {
+                    isFavourite = false;
+                }
+                fab.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (!isFavourite) {
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
+                            isFavourite = true;
+                            fab.setSelected(true);
 //                                if (sqliteHelper.data(movieId)){
 //                                    sqliteHelper.update(movieId, isFavourite);
 //                                }else {
 //                                    sqliteHelper.insert(movieId, title_name, isFavourite);
 //                                }
 
-                                sqliteHelper.data(new HandlerResultListener() {
-                                    @Override
-                                    public void onResult(Object... object) {
-                                        boolean movieAlreadyPresent = (boolean)object[0];
-                                        if (movieAlreadyPresent){
-                                            sqliteHelper.update(movieId, isFavourite);
-                                        }else {
-                                            sqliteHelper.insert(movieId, title_name, isFavourite);
-                                        }
+                            sqliteHelper.data(new HandlerResultListener() {
+                                @Override
+                                public void onResult(Object... object) {
+                                    boolean movieAlreadyPresent = (boolean) object[0];
+                                    if (movieAlreadyPresent) {
+                                        sqliteHelper.update(movieId, isFavourite);
+                                    } else {
+                                        sqliteHelper.insert(movieId, title_name, isFavourite);
                                     }
-                                },movieId);
-                            }else {
-                                fab.setSelected(false);
-                                isFavourite = false;
-                                fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
-                                sqliteHelper.update(movieId,isFavourite);
-                            }
-
+                                }
+                            }, movieId);
+                        } else {
+                            fab.setSelected(false);
+                            isFavourite = false;
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
+                            sqliteHelper.update(movieId, isFavourite);
                         }
-                    });
+
+                    }
+                });
 //                    if(sqliteHelper.isMovieFavourite(movieId)){
 //                        fab.setSelected(true);
 //                        fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
@@ -201,17 +202,18 @@ public class MovieResponseFragment extends Fragment {
                     @Override
                     public void onResult(Object... object) {
                         boolean isMovieFavourite = (boolean) object[0];
-                        if (isMovieFavourite){
+                        if (isMovieFavourite) {
                             fab.setSelected(true);
-                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite));
-                        }else {
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite));
+                        } else {
                             fab.setSelected(false);
-                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_favourite_border));
+                            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favourite_border));
                         }
-                        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),"onBack Pressed ++" + isMovieFavourite);
+                        ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(), "onBack Pressed ++" + isMovieFavourite);
                     }
-                },movieId);
+                }, movieId);
             }
+
             @Override
             public void onFailure(Call<MovieId> call, Throwable t) {
                 Log.d(TAG, "onFailure: ");

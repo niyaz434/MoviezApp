@@ -1,10 +1,11 @@
 package com.example.mohamedniyaz.moviezapp.activity;
 
-import android.app.FragmentManager;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.mohamedniyaz.moviezapp.R;
 import com.example.mohamedniyaz.moviezapp.fragments.MovieFragment;
@@ -15,20 +16,20 @@ import com.example.mohamedniyaz.moviezapp.moviezApp.ConstantMethods;
 // TODO Reasonable naming
 public class MovieActivity extends AppCompatActivity implements FragmentActivityCommunication {
     public static final String TAG = "MainAvtivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ConstantMethods.newInstance().printLogs("onCreate", "onCreate:  ++ ");
         Fragment fragment = new MovieFragment();
-        if(fragment!=null) {
-            FragmentManager fragmentManager = getFragmentManager();
+        if (fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.add(R.id.fragment_one_frame, fragment);
             fragmentTransaction.addToBackStack(MovieFragment.class.getSimpleName());
             fragmentTransaction.commit();
         }
-
     }
 
     @Override
@@ -40,20 +41,21 @@ public class MovieActivity extends AppCompatActivity implements FragmentActivity
     @Override
     public void movieId(int position) {
         Fragment fragment = MovieResponseFragment.newInstance(position);
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment_one_frame,fragment)
-                .addToBackStack(null).commit();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_one_frame, fragment)
+                .addToBackStack(MovieResponseFragment.class.getSimpleName()).commit();
         ConstantMethods.newInstance().printLogs(TAG, "movieId: " + position);
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        int count = getFragmentManager().getBackStackEntryCount();
-       /* if (count > 0) {
-            ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(),MovieFragment.class.getSimpleName());
-            getFragmentManager().popBackStackImmediate(MovieFragment.class.getSimpleName(),0);
-        }*/
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 1) {
+            ConstantMethods.newInstance().printLogs(this.getClass().getSimpleName(), MovieFragment.class.getSimpleName());
+            getSupportFragmentManager().popBackStack();
+        } else {
+            finish();
+        }
         ConstantMethods.newInstance().printLogs(TAG, "onBackPressed: " + count);
     }
 }
